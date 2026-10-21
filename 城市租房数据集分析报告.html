@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>城市租房数据集分析报告</title>
+<style>
+  :root{--tx:#1a1d22;--tx2:#4a5260;--tx3:#7b8494;--line:#e3e7ee;--acc:#0f766e;--accbg:#f0fdfa;}
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#f7f8fa;color:var(--tx);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:16px;line-height:1.9;padding:40px 20px 80px}
+  .paper{max-width:800px;margin:0 auto;background:#fff;padding:64px 68px 80px;border-radius:4px;
+    box-shadow:0 1px 3px rgba(20,25,35,.06),0 12px 40px rgba(20,25,35,.05)}
+  h1{font-size:29px;line-height:1.35;font-weight:700;padding-bottom:20px;
+    border-bottom:2px solid var(--tx);margin-bottom:26px}
+  h2{font-size:21px;font-weight:700;margin:46px 0 16px;padding-top:20px;border-top:1px solid var(--line)}
+  h3{font-size:17px;font-weight:700;margin:28px 0 10px;color:var(--acc)}
+  p{color:var(--tx2);margin:0 0 14px}
+  strong{color:var(--tx);font-weight:600}
+  a{color:var(--acc);text-decoration:none;border-bottom:1px solid rgba(15,118,110,.3)}
+  ul,ol{margin:0 0 16px 0;padding-left:22px}
+  li{color:var(--tx2);margin-bottom:7px}
+  li::marker{color:var(--acc)}
+  hr{border:none;border-top:1px solid var(--line);margin:38px 0}
+  blockquote{background:var(--accbg);border-left:3px solid var(--acc);
+    padding:16px 20px;margin:20px 0;border-radius:0 6px 6px 0}
+  blockquote p{margin-bottom:10px}
+  blockquote p:last-child{margin-bottom:0}
+  code{font-family:"SF Mono",Consolas,Monaco,monospace;font-size:13.5px;
+    background:#f1f3f7;color:#b03060;padding:2px 5px;border-radius:3px}
+  pre.code{background:#1e2430;color:#dde3ed;padding:16px 18px;border-radius:6px;
+    overflow-x:auto;margin:18px 0;font-size:13px;line-height:1.75}
+  pre.code code{background:none;color:inherit;padding:0}
+  .tw{overflow-x:auto;margin:18px 0 22px}
+  table{width:100%;border-collapse:collapse;font-size:14px}
+  th{background:#f4f6f9;text-align:left;padding:10px 12px;font-weight:700;
+    border:1px solid var(--line);color:var(--tx)}
+  td{padding:9px 12px;border:1px solid var(--line);color:var(--tx2);vertical-align:top}
+  tbody tr:nth-child(even){background:#fbfcfd}
+  figure.fig{margin:26px 0 30px;padding:18px 14px;background:#fcfdfe;
+    border:1px solid var(--line);border-radius:6px;text-align:center}
+  figure.fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
+  figcaption{font-size:12.5px;color:var(--tx3);margin-top:10px}
+  @media print{body{background:#fff;padding:0}
+    .paper{box-shadow:none;padding:0;max-width:100%}
+    h2{page-break-after:avoid} table,pre,figure{page-break-inside:avoid}}
+  @media(max-width:700px){.paper{padding:30px 20px 46px}h1{font-size:23px}
+    h2{font-size:18px}body{padding:14px 8px 50px}}
+</style>
+</head>
+<body>
+<div class="paper">
+<h1>城市租房数据集分析报告</h1>
+<p><strong>分析对象</strong>：北上广深四城 12,000 条租房挂牌数据　|　<strong>数据时点</strong>：2020-08</p>
+<hr>
+<h2>摘要</h2>
+<p>本报告基于北上广深四个一线城市共 <strong>12,000</strong> 条租房挂牌数据（清洗后保留 <strong>10,722</strong> 条），回答两个问题：租金由什么决定，以及如何判断一套房源定价是否合理。</p>
+<p>四个主要结论：</p>
+<ol><li><strong>城市间的租金差距小于城市内部的区县差距</strong>。四城中位租金单价最高与最低相差 1.93 倍（北京 92.9 vs 广州 48.2 元/㎡/月），但同一城市内部区县之间最大相差 <strong>7.3 倍</strong>（上海静安 152.9 vs 广州从化 20.8）。区位是比"城市"更细、也更有解释力的切面。</li><li><strong>面积对租金的影响存在规模效应，但不单调</strong>。面积弹性为 <strong>0.854</strong>——面积每增加 1%，租金只增加 0.85%，说明大房子的单位面积更便宜。但分箱后 120㎡ 以上的单价回升至 87.7 元，高于 90–120㎡ 的 59.6，说明大户型里混着高单价豪宅，不能用一条递减曲线概括。</li><li><strong>控制区位后，多一个卫生间溢价 14.8%，精装溢价 14.2%，距地铁每远 1 公里租金降 9.7%</strong>。而"朝南"的系数为 <strong>-3.7%</strong>，与直觉相反——这是遗漏变量（房龄）的典型表现，不能解读为"朝南不值钱"。</li><li><strong>仅凭公开的房源属性可解释约 78% 的租金波动</strong>（测试集 R² = 0.776），剩余部分由房龄、采光、装修细节、房东心态等未观测因素决定。</li></ol>
+<hr>
+<h2>目录</h2>
+<ol><li><a href="#1-项目背景">项目背景</a></li><li><a href="#2-数据说明">数据说明</a></li><li><a href="#3-数据清洗">数据清洗</a></li><li><a href="#4-探索性分析">探索性分析</a></li><li><a href="#5-建模与验证">建模与验证</a></li><li><a href="#6-结论与建议">结论与建议</a></li><li><a href="#7-局限性">局限性</a></li><li><a href="#8-附录">附录</a></li></ol>
+<hr>
+<h2>1. 项目背景</h2>
+<p>城市租房市场的信息长期分散且不透明。租金受区位、面积、户型、装修、朝向、通勤等多重因素影响，但市场缺乏公开、量化、可复现的定价参照体系。</p>
+<p>由此产生三方困境：</p>
+<div class="tw"><table><thead><tr><th>角色</th><th>困境</th><th>需要什么</th></tr></thead><tbody><tr><td>租客</td><td>无法判断价格是否合理，只能凭经验横向比价</td><td>同区位同类型的价格参照</td></tr><tr><td>房东 / 中介</td><td>缺少定价依据，挂高空置、挂低损失</td><td>属性对租金的量化影响</td></tr><tr><td>平台运营</td><td>缺少房源价格合理性的度量指标</td><td>可自动化的价格异常识别规则</td></tr></tbody></table></div>
+<p><strong>分析目标</strong>：把"租金是否合理"这一经验判断，转化为可量化、可验证的指标与模型。</p>
+<hr>
+<h2>2. 数据说明</h2>
+<h3>2.1 数据来源</h3>
+<div class="tw"><table><thead><tr><th>项目</th><th>内容</th></tr></thead><tbody><tr><td>来源</td><td>和鲸社区「北上广深链家网全部租房房源数据」，原始出处 <a href="https://github.com/Alfred1984/interesting-python/tree/master/BSGS_Rent">Alfred1984/interesting-python</a></td></tr><tr><td>许可</td><td>CC0 公共领域共享</td></tr><tr><td>覆盖</td><td>北京 / 上海 / 广州 / 深圳，各 3,000 条</td></tr><tr><td>数据时点</td><td>2020 年 8 月</td></tr><tr><td>字段数</td><td>20</td></tr></tbody></table></div>
+<blockquote><p><strong>合规声明</strong>：数据仅用于学习研究与作品展示，不用于商业用途，不对外分发原始明细。数据不含任何个人身份信息。</p></blockquote>
+<blockquote><p><strong>时效说明</strong>：数据采集于 2020 年 8 月，距今已有数年。因此本报告定位为<strong>历史快照分析</strong>，结论反映的是当时的价格结构，不用于判断当下市场水平。价格<strong>结构关系</strong>（哪些因素影响租金、影响方向）比绝对水平更稳定，也是本报告的主要关注点。</p></blockquote>
+<h3>2.2 字段说明</h3>
+<div class="tw"><table><thead><tr><th>原始字段</th><th>含义</th><th>类型</th></tr></thead><tbody><tr><td><code>_id</code></td><td>房源唯一编号</td><td>string</td></tr><tr><td><code>city</code> / <code>dist</code></td><td>城市 / 区县</td><td>string</td></tr><tr><td><code>bizcircle_name</code></td><td>商圈</td><td>string</td></tr><tr><td><code>resblock_name</code></td><td>小区名</td><td>string</td></tr><tr><td><code>rent_price_listing</code></td><td>月租金（元）</td><td><strong>原始为字符串</strong></td></tr><tr><td><code>rent_area</code></td><td>面积（㎡）</td><td><strong>原始为字符串</strong></td></tr><tr><td><code>layout</code></td><td>户型，如 <code>3室2厅2卫</code></td><td>string</td></tr><tr><td><code>frame_orientation</code></td><td>朝向，多值为组合（如 <code>南 北</code>）</td><td>string</td></tr><tr><td><code>house_tag</code></td><td>标签，如 <code>精装 集中供暖 双卫生间</code></td><td>string</td></tr><tr><td><code>distance</code></td><td>距地铁距离（米），缺失 43.4%</td><td>float</td></tr><tr><td><code>type</code></td><td>整租 / 合租</td><td>string</td></tr><tr><td><code>latitude</code> / <code>longitude</code></td><td>经纬度</td><td>float</td></tr></tbody></table></div>
+<h3>2.3 数据质量的四个关键问题</h3>
+<p>这份数据有几个必须处理、且会直接影响结论的问题：</p>
+<div class="tw"><table><thead><tr><th>问题</th><th>表现</th><th>处理</th></tr></thead><tbody><tr><td>数值存成字符串</td><td><code>rent_price_listing</code>、<code>rent_area</code> 是文本，无法直接计算</td><td>正则抽取数字，解析失败置空</td></tr><tr><td>装修信息无独立列</td><td>装修只藏在 <code>house_tag</code> 里（<code>精装 集中供暖…</code>）</td><td>从标签派生，只分「精装 / 未标注」</td></tr><tr><td><strong>合租与整租口径不同</strong></td><td>合租填的是<strong>单间</strong>面积与价格（中位 13㎡ / 154.5 元），整租是整套（78㎡ / 75.3 元）</td><td>标记 <code>is_shared</code>，单价分析排除合租</td></tr><tr><td>朝向是多值组合</td><td>96 种取值（<code>南</code>、<code>南 北</code>、<code>东南 西南 西 东北</code>…），直接分组无意义</td><td>归并为「是否朝南」布尔字段</td></tr></tbody></table></div>
+<blockquote><p><strong>第 3 条是本数据最大的陷阱。</strong> 如果不加区分直接算单价，会得出"合租比整租贵一倍"的荒谬结论——合租单价高不是市场规律，而是面积口径不同。</p>
+<p><strong>第 4 条有个容易犯的错</strong>：用 <code>contains("南")</code> 判断朝南，会把「东南」「西南」也误判为朝南。必须匹配独立的「南」字（<code>(?:^\|\s)南(?:\s\|$)</code>）。</p></blockquote>
+<hr>
+<h2>3. 数据清洗</h2>
+<h3>3.1 清洗顺序</h3>
+<p>清洗顺序影响结果，固定为六步：</p>
+<ol><li><strong>列名标准化</strong> — 后续逻辑依赖标准名</li><li><strong>类型解析</strong> — 必须早于去重（<code>89</code> 与 <code>89.0</code> 在字符串里是不同值）</li><li><strong>双层去重</strong> — 完全重复 + 业务键重复</li><li><strong>缺失值分级处理</strong> — 必须在分位数计算之前（NaN 会污染阈值）</li><li><strong>异常值分组过滤</strong> — 用干净数据算分位</li><li><strong>派生特征</strong> — 依赖清洗后的数值</li></ol>
+<h3>3.2 清洗对账</h3>
+<div class="tw"><table><thead><tr><th>步骤</th><th>清洗前</th><th>清洗后</th><th>剔除</th><th>说明</th></tr></thead><tbody><tr><td>类型解析</td><td>12,000</td><td>12,000</td><td>0</td><td>全部成功解析为数值</td></tr><tr><td>去重（完全重复）</td><td>12,000</td><td>12,000</td><td>0</td><td>无翻页重叠</td></tr><tr><td>去重（业务键）</td><td>12,000</td><td>11,544</td><td><strong>456</strong></td><td>键 = 小区+面积+户型+租金</td></tr><tr><td>缺失值处理</td><td>11,544</td><td>11,544</td><td>0</td><td>核心字段无缺失</td></tr><tr><td>异常值（硬规则）</td><td>11,544</td><td>11,544</td><td>0</td><td>无非法值</td></tr><tr><td>异常值（分位）</td><td>11,544</td><td><strong>10,722</strong></td><td><strong>822</strong></td><td>按商圈 1%/99% 分位</td></tr><tr><td><strong>合计</strong></td><td><strong>12,000</strong></td><td><strong>10,722</strong></td><td><strong>1,278</strong></td><td>保留率 <strong>89.3%</strong></td></tr></tbody></table></div>
+<p>完整日志见 <a href="data/cleaning_log.csv"><code>data/cleaning_log.csv</code></a>。</p>
+<h3>3.3 两个非标准处理</h3>
+<p><strong>① 异常值按商圈分组，不用全城口径</strong></p>
+<p>核心地段的大户型高价房，在全城分布里是极端值，但按它所在商圈看完全合理。因此按商圈分组算 1% / 99% 分位，样本量少于 10 条的商圈退回全城口径。若用全城口径，删掉的多半是真实的高价房源，结论会系统性偏向低价房。</p>
+<p>用分位而非 3σ 的理由：租金是右偏分布（偏度 4.41），标准差被长尾撑大，3σ 会同时放过异常值、误伤正常贵房源。</p>
+<p><strong>② 缺失率高的字段不一律丢弃</strong></p>
+<p><code>distance</code>（地铁距离）缺失 43.4%，按默认阈值（30%）会被整列丢弃。但这个字段的缺失往往表示"小区附近没有地铁站"，本身就是信息，不是数据丢失。因此对这类字段做<strong>豁免</strong>，保留并在建模时额外加一个「缺失标记」列。</p>
+<hr>
+<h2>4. 探索性分析</h2>
+<h3>4.1 单变量分布</h3>
+<div class="tw"><table><thead><tr><th>指标</th><th>均值</th><th>中位数</th><th>标准差</th><th>偏度</th><th>变异系数</th></tr></thead><tbody><tr><td>月租金（元）</td><td>7,093</td><td><strong>5,000</strong></td><td>7,369</td><td>4.41</td><td>1.04</td></tr><tr><td>面积（㎡）</td><td>85.0</td><td><strong>76.0</strong></td><td>57.1</td><td>2.59</td><td>0.67</td></tr><tr><td>租金单价（元/㎡/月）</td><td>84.9</td><td><strong>76.9</strong></td><td>45.3</td><td>1.18</td><td>0.53</td></tr></tbody></table></div>
+<p>三个指标全部右偏，租金尤其明显（偏度 4.41，最高 16 万元/月）。</p>
+<figure class="fig"><svg xmlns="http://www.w3.org/2000/svg" width="820" height="380" viewBox="0 0 820 380" font-family="'Microsoft YaHei','PingFang SC',sans-serif"><rect width="820" height="380" fill="#ffffff"/>
+<text x="62" y="34" font-size="17" fill="#1f2328" text-anchor="start" font-weight="700">租金单价分布（含合租样本）</text>
+<text x="62" y="54" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal">右偏分布，均值高于中位数，因此结论一律用中位数</text>
+<line x1="62" y1="324.0" x2="790" y2="324.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="62" y1="259.5" x2="790" y2="259.5" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="62" y1="195.0" x2="790" y2="195.0" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="62" y1="130.5" x2="790" y2="130.5" stroke="#e5e7eb" stroke-width="1"/>
+<line x1="62" y1="66.0" x2="790" y2="66.0" stroke="#e5e7eb" stroke-width="1"/>
+<rect x="62.0" y="261.9" width="16.7" height="62.1" fill="#0f766e" opacity="0.85"/>
+<rect x="80.2" y="215.4" width="16.7" height="108.6" fill="#0f766e" opacity="0.85"/>
+<rect x="98.4" y="185.8" width="16.7" height="138.2" fill="#0f766e" opacity="0.85"/>
+<rect x="116.6" y="138.3" width="16.7" height="185.7" fill="#0f766e" opacity="0.85"/>
+<rect x="134.8" y="117.2" width="16.7" height="206.8" fill="#0f766e" opacity="0.85"/>
+<rect x="153.0" y="111.0" width="16.7" height="213.0" fill="#0f766e" opacity="0.85"/>
+<rect x="171.2" y="99.7" width="16.7" height="224.3" fill="#0f766e" opacity="0.85"/>
+<rect x="189.4" y="120.8" width="16.7" height="203.2" fill="#0f766e" opacity="0.85"/>
+<rect x="207.6" y="161.1" width="16.7" height="162.9" fill="#0f766e" opacity="0.85"/>
+<rect x="225.8" y="145.8" width="16.7" height="178.2" fill="#0f766e" opacity="0.85"/>
+<rect x="244.0" y="155.6" width="16.7" height="168.4" fill="#0f766e" opacity="0.85"/>
+<rect x="262.2" y="167.0" width="16.7" height="157.0" fill="#0f766e" opacity="0.85"/>
+<rect x="280.4" y="166.3" width="16.7" height="157.7" fill="#0f766e" opacity="0.85"/>
+<rect x="298.6" y="174.4" width="16.7" height="149.6" fill="#0f766e" opacity="0.85"/>
+<rect x="316.8" y="165.0" width="16.7" height="159.0" fill="#0f766e" opacity="0.85"/>
+<rect x="335.0" y="192.3" width="16.7" height="131.7" fill="#0f766e" opacity="0.85"/>
+<rect x="353.2" y="205.0" width="16.7" height="119.0" fill="#0f766e" opacity="0.85"/>
+<rect x="371.4" y="211.5" width="16.7" height="112.5" fill="#0f766e" opacity="0.85"/>
+<rect x="389.6" y="239.5" width="16.7" height="84.5" fill="#0f766e" opacity="0.85"/>
+<rect x="407.8" y="239.5" width="16.7" height="84.5" fill="#0f766e" opacity="0.85"/>
+<rect x="426.0" y="256.7" width="16.7" height="67.3" fill="#0f766e" opacity="0.85"/>
+<rect x="444.2" y="263.8" width="16.7" height="60.2" fill="#0f766e" opacity="0.85"/>
+<rect x="462.4" y="268.1" width="16.7" height="55.9" fill="#0f766e" opacity="0.85"/>
+<rect x="480.6" y="278.8" width="16.7" height="45.2" fill="#0f766e" opacity="0.85"/>
+<rect x="498.8" y="284.7" width="16.7" height="39.3" fill="#0f766e" opacity="0.85"/>
+<rect x="517.0" y="298.6" width="16.7" height="25.4" fill="#0f766e" opacity="0.85"/>
+<rect x="535.2" y="300.9" width="16.7" height="23.1" fill="#0f766e" opacity="0.85"/>
+<rect x="553.4" y="303.5" width="16.7" height="20.5" fill="#0f766e" opacity="0.85"/>
+<rect x="571.6" y="309.4" width="16.7" height="14.6" fill="#0f766e" opacity="0.85"/>
+<rect x="589.8" y="305.5" width="16.7" height="18.5" fill="#0f766e" opacity="0.85"/>
+<rect x="608.0" y="309.7" width="16.7" height="14.3" fill="#0f766e" opacity="0.85"/>
+<rect x="626.2" y="308.1" width="16.7" height="15.9" fill="#0f766e" opacity="0.85"/>
+<rect x="644.4" y="313.6" width="16.7" height="10.4" fill="#0f766e" opacity="0.85"/>
+<rect x="662.6" y="315.5" width="16.7" height="8.5" fill="#0f766e" opacity="0.85"/>
+<rect x="680.8" y="319.1" width="16.7" height="4.9" fill="#0f766e" opacity="0.85"/>
+<rect x="699.0" y="318.1" width="16.7" height="5.9" fill="#0f766e" opacity="0.85"/>
+<rect x="717.2" y="319.1" width="16.7" height="4.9" fill="#0f766e" opacity="0.85"/>
+<rect x="735.4" y="322.4" width="16.7" height="1.6" fill="#0f766e" opacity="0.85"/>
+<rect x="753.6" y="319.8" width="16.7" height="4.2" fill="#0f766e" opacity="0.85"/>
+<rect x="771.8" y="320.4" width="16.7" height="3.6" fill="#0f766e" opacity="0.85"/>
+<text x="62.0" y="346" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">17</text>
+<text x="207.6" y="346" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">64</text>
+<text x="353.2" y="346" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">111</text>
+<text x="498.8" y="346" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">158</text>
+<text x="644.4" y="346" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">205</text>
+<text x="790.0" y="346" font-size="11" fill="#6b7280" text-anchor="middle" font-weight="normal">252</text>
+<text x="426.0" y="368" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">元/㎡/月</text>
+<line x1="247.2" y1="66" x2="247.2" y2="324" stroke="#b45309" stroke-width="1.6" stroke-dasharray="4 3"/>
+<text x="253.1728660564301" y="82" font-size="12" fill="#b45309" text-anchor="start" font-weight="700">中位数 77</text>
+</svg><figcaption>租金单价分布</figcaption></figure>
+<p><strong>业务含义</strong>：均值被少量高价房源拉高——租金均值 7,093 元，但中位数只有 5,000 元，均值比中位数高 42%。<strong>报告中必须报中位数</strong>，否则会系统性高估普通租客的实际负担。</p>
+<h3>4.2 城市与区县梯度</h3>
+<p><strong>城市层</strong></p>
+<div class="tw"><table><thead><tr><th>城市</th><th>房源数</th><th>中位单价</th><th>中位租金</th><th>中位面积</th></tr></thead><tbody><tr><td>北京</td><td>2,745</td><td><strong>92.9</strong></td><td>6,500</td><td>77.0</td></tr><tr><td>深圳</td><td>2,572</td><td>92.8</td><td>4,380</td><td>51.0</td></tr><tr><td>上海</td><td>2,767</td><td>80.5</td><td>6,000</td><td>89.0</td></tr><tr><td>广州</td><td>2,638</td><td><strong>48.2</strong></td><td>3,200</td><td>75.0</td></tr></tbody></table></div>
+<p>北京与广州相差 <strong>1.93 倍</strong>。</p>
+<figure class="fig"><svg xmlns="http://www.w3.org/2000/svg" width="820" height="420" viewBox="0 0 820 420" font-family="'Microsoft YaHei','PingFang SC',sans-serif"><rect width="820" height="420" fill="#ffffff"/>
+<text x="62" y="34" font-size="17" fill="#1f2328" text-anchor="start" font-weight="700">四城市中位租金单价</text>
+<text x="62" y="54" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal">元/㎡/月　｜　北京与广州相差 1.93 倍</text>
+<line x1="62" y1="342.0" x2="790" y2="342.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="346.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<line x1="62" y1="273.0" x2="790" y2="273.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="277.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">27</text>
+<line x1="62" y1="204.0" x2="790" y2="204.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="208.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">55</text>
+<line x1="62" y1="135.0" x2="790" y2="135.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="139.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">82</text>
+<line x1="62" y1="66.0" x2="790" y2="66.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="70.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">110</text>
+<rect x="124.0" y="108.1" width="58.0" height="233.9" fill="#0f766e" rx="3"/>
+<text x="153.0" y="101.1016949152542" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">92.9</text>
+<text x="153.0" y="362" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">北京</text>
+<rect x="306.0" y="118.7" width="58.0" height="223.3" fill="#0f766e" rx="3"/>
+<text x="335.0" y="111.73343605546995" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">88.6</text>
+<text x="335.0" y="362" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">深圳</text>
+<rect x="488.0" y="139.0" width="58.0" height="203.0" fill="#0f766e" rx="3"/>
+<text x="517.0" y="131.99884807748057" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">80.6</text>
+<text x="517.0" y="362" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">上海</text>
+<rect x="670.0" y="222.5" width="58.0" height="119.5" fill="#0f766e" rx="3"/>
+<text x="699.0" y="215.45875411574923" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">47.5</text>
+<text x="699.0" y="362" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">广州</text>
+</svg><figcaption>四城市中位租金单价</figcaption></figure>
+<p>值得注意：深圳的中位单价与北京几乎持平（92.8 vs 92.9），但中位<strong>面积只有 51㎡</strong>（北京 77㎡），中位租金 4,380 元也明显低于北京的 6,500 元。<strong>深圳是"单价高、总价低"的结构</strong>——房间小，但每平米贵。</p>
+<p><strong>区县层</strong></p>
+<div class="tw"><table><thead><tr><th>区县</th><th>城市</th><th>房源数</th><th>中位单价</th><th>离散度</th></tr></thead><tbody><tr><td>静安</td><td>上海</td><td>84</td><td><strong>152.9</strong></td><td>0.19</td></tr><tr><td>黄浦</td><td>上海</td><td>100</td><td>133.3</td><td>0.26</td></tr><tr><td>福田区</td><td>深圳</td><td>454</td><td>129.0</td><td>0.36</td></tr><tr><td>长宁</td><td>上海</td><td>162</td><td>128.8</td><td>0.24</td></tr><tr><td>南山区</td><td>深圳</td><td>553</td><td>126.0</td><td>0.36</td></tr><tr><td>朝阳</td><td>北京</td><td>953</td><td>113.5</td><td>0.30</td></tr><tr><td>浦东</td><td>上海</td><td>745</td><td>81.6</td><td>0.46</td></tr><tr><td>白云</td><td>广州</td><td>593</td><td>44.4</td><td>0.43</td></tr><tr><td>番禺</td><td>广州</td><td>491</td><td>40.0</td><td>0.34</td></tr><tr><td>从化</td><td>广州</td><td>13</td><td><strong>20.8</strong></td><td>0.26</td></tr></tbody></table></div>
+<p>最高（静安）与最低（从化）相差 <strong>7.3 倍</strong>，远超城市间的 1.93 倍。</p>
+<figure class="fig"><svg xmlns="http://www.w3.org/2000/svg" width="880" height="450" viewBox="0 0 880 450" font-family="'Microsoft YaHei','PingFang SC',sans-serif"><rect width="880" height="450" fill="#ffffff"/>
+<text x="62" y="34" font-size="17" fill="#1f2328" text-anchor="start" font-weight="700">区县中位租金单价（样本量 ≥100 的区县，取最高与最低各 8 个）</text>
+<text x="62" y="54" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal">元/㎡/月　｜　静安 152.9 是从化 20.8 的 7.3 倍</text>
+<line x1="62" y1="372.0" x2="850" y2="372.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="376.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<line x1="62" y1="295.5" x2="850" y2="295.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="299.5" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">39</text>
+<line x1="62" y1="219.0" x2="850" y2="219.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="223.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">79</text>
+<line x1="62" y1="142.5" x2="850" y2="142.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="146.5" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">118</text>
+<line x1="62" y1="66.0" x2="850" y2="66.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="70.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">157</text>
+<rect x="71.4" y="112.7" width="30.5" height="259.3" fill="#0f766e" rx="3"/>
+<text x="86.625" y="105.67796610169495" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">133.3</text>
+<text x="86.625" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 86.625 392)">黄浦</text>
+<rect x="120.6" y="121.5" width="30.5" height="250.5" fill="#0f766e" rx="3"/>
+<text x="135.875" y="114.49133015699445" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">128.8</text>
+<text x="135.875" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 135.875 392)">长宁</text>
+<rect x="169.9" y="127.3" width="30.5" height="244.7" fill="#0f766e" rx="3"/>
+<text x="185.125" y="120.31711317659921" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">125.8</text>
+<text x="185.125" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 185.125 392)">西城</text>
+<rect x="219.1" y="135.4" width="30.5" height="236.6" fill="#0f766e" rx="3"/>
+<text x="234.375" y="128.41244846541454" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">121.6</text>
+<text x="234.375" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 234.375 392)">南山区</text>
+<rect x="268.4" y="143.2" width="30.5" height="228.8" fill="#0f766e" rx="3"/>
+<text x="283.625" y="136.18644067796612" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">117.6</text>
+<text x="283.625" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 283.625 392)">福田区</text>
+<rect x="317.6" y="143.2" width="30.5" height="228.8" fill="#0f766e" rx="3"/>
+<text x="332.875" y="136.18644067796612" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">117.6</text>
+<text x="332.875" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 332.875 392)">徐汇</text>
+<rect x="366.9" y="146.3" width="30.5" height="225.7" fill="#0f766e" rx="3"/>
+<text x="382.125" y="139.25090799031483" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">116.1</text>
+<text x="382.125" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 382.125 392)">海淀</text>
+<rect x="416.1" y="151.3" width="30.5" height="220.7" fill="#0f766e" rx="3"/>
+<text x="431.375" y="144.3003966822936" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">113.5</text>
+<text x="431.375" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 431.375 392)">朝阳</text>
+<rect x="465.4" y="269.5" width="30.5" height="102.5" fill="#94a3b8" rx="3"/>
+<text x="480.625" y="262.4506425777612" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">52.7</text>
+<text x="480.625" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 480.625 392)">嘉定</text>
+<rect x="514.6" y="272.5" width="30.5" height="99.5" fill="#94a3b8" rx="3"/>
+<text x="529.875" y="265.54410631741143" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">51.1</text>
+<text x="529.875" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 529.875 392)">青浦</text>
+<rect x="563.9" y="281.7" width="30.5" height="90.3" fill="#94a3b8" rx="3"/>
+<text x="579.125" y="274.68725158921376" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">46.4</text>
+<text x="579.125" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 579.125 392)">松江</text>
+<rect x="613.1" y="285.9" width="30.5" height="86.1" fill="#94a3b8" rx="3"/>
+<text x="628.375" y="278.8771186440678" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">44.3</text>
+<text x="628.375" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 628.375 392)">房山</text>
+<rect x="662.4" y="286.1" width="30.5" height="85.9" fill="#94a3b8" rx="3"/>
+<text x="677.625" y="279.0618841150966" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">44.2</text>
+<text x="677.625" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 677.625 392)">白云</text>
+<rect x="711.6" y="290.3" width="30.5" height="81.7" fill="#94a3b8" rx="3"/>
+<text x="726.875" y="283.2571849668386" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">42.0</text>
+<text x="726.875" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 726.875 392)">荔湾</text>
+<rect x="760.9" y="294.2" width="30.5" height="77.8" fill="#94a3b8" rx="3"/>
+<text x="776.125" y="287.2033898305085" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">40.0</text>
+<text x="776.125" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 776.125 392)">番禺</text>
+<rect x="810.1" y="318.0" width="30.5" height="54.0" fill="#94a3b8" rx="3"/>
+<text x="825.375" y="310.97457627118644" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">27.8</text>
+<text x="825.375" y="392" font-size="12" fill="#6b7280" text-anchor="end" font-weight="normal" transform="rotate(-32 825.375 392)">增城</text>
+</svg><figcaption>区县租金梯度</figcaption></figure>
+<p><strong>业务含义</strong>：<strong>"哪个城市的租金贵"是个伪问题，真正该问的是"哪个区县、哪个商圈"。</strong> 城市内部的分化比城市之间更剧烈。另外，浦东的离散度 0.46 是样本量较大区县里最高的——说明浦东内部分化极大，只看区均值会严重掩盖板块差异（陆家嘴和临港不是一个世界）。</p>
+<h3>4.3 商圈价格带</h3>
+<p>样本量 ≥ 10 的商圈共 346 个，中位单价最高的几个：</p>
+<div class="tw"><table><thead><tr><th>商圈</th><th>城市</th><th>房源数</th><th>中位单价</th><th>P25</th><th>P75</th></tr></thead><tbody><tr><td>新天地</td><td>上海</td><td>13</td><td>195.9</td><td>150.5</td><td>232.9</td></tr><tr><td>衡山路</td><td>上海</td><td>19</td><td>193.2</td><td>179.5</td><td>207.9</td></tr><tr><td>东大桥</td><td>北京</td><td>11</td><td>188.9</td><td>169.1</td><td>210.1</td></tr><tr><td>深圳湾</td><td>深圳</td><td>28</td><td>188.6</td><td>156.6</td><td>215.2</td></tr><tr><td>CBD</td><td>北京</td><td>11</td><td>184.0</td><td>130.7</td><td>203.2</td></tr><tr><td>金融街</td><td>北京</td><td>18</td><td>182.4</td><td>161.0</td><td>200.8</td></tr></tbody></table></div>
+<p><strong>业务含义</strong>：商圈的 P25–P75 区间就是该片区的"合理价格带"。低于 P25 的房源即为折价候选，高于 P75 则为明显溢价。这是后面性价比识别的方法基础。</p>
+<h3>4.4 属性与单价的关系</h3>
+<div class="tw"><table><thead><tr><th>属性</th><th>分组</th><th>房源数</th><th>中位单价</th><th>占比</th></tr></thead><tbody><tr><td>装修</td><td>精装</td><td>2,465</td><td><strong>107.1</strong></td><td>23.0%</td></tr><tr><td></td><td>未标注</td><td>8,257</td><td>68.8</td><td>77.0%</td></tr><tr><td>朝向</td><td>含独立「南」</td><td>6,706</td><td>75.0</td><td>62.5%</td></tr><tr><td></td><td>不含「南」</td><td>3,900</td><td>80.9</td><td>36.4%</td></tr><tr><td>租赁类型</td><td>整租</td><td>10,383</td><td>75.3</td><td>96.8%</td></tr><tr><td></td><td>合租</td><td>339</td><td>154.5</td><td>3.2%</td></tr></tbody></table></div>
+<p><strong>三个必须谨慎解读的陷阱</strong>：</p>
+<ol><li><strong>精装的高单价有一半是区位带来的。</strong> 精装房源中位单价 107.1，比未标注高 55.8%，但精装房很可能集中在核心区。控制变量后的真实溢价是 <strong>14.2%</strong>（见 5.2 节），不到表面差异的三分之一。</li><li><strong>朝南的单价反而更低（75.0 vs 80.9）。</strong> 这与"朝南应该更贵"的直觉相反。原因是「南 北」这种南北通透的房源多为房龄较长的老小区，而房龄不在数据里。<strong>这是遗漏变量造成的假象，不能得出"朝南不值钱"的结论。</strong></li><li><strong>合租单价 154.5 是整租的两倍多，但这是口径问题。</strong> 合租的中位面积只有 13㎡，填的是单间面积。两者的单价完全不可比。</li></ol>
+<h3>4.5 面积与单价：非线性，且不单调</h3>
+<p>面积与租金单价的皮尔逊相关系数仅 <strong>-0.048</strong>——几乎没有线性关系。这容易让人得出"面积不影响单价"的错误结论。</p>
+<p>但按面积分箱后，模式很清晰：</p>
+<div class="tw"><table><thead><tr><th>面积段</th><th>房源数</th><th>中位单价</th><th>趋势</th></tr></thead><tbody><tr><td>30㎡ 以下</td><td>1,156</td><td><strong>98.8</strong></td><td>小户型单价最高</td></tr><tr><td>30–60</td><td>2,810</td><td>87.8</td><td>↓</td></tr><tr><td>60–90</td><td>3,090</td><td>65.3</td><td>↓</td></tr><tr><td>90–120</td><td>1,817</td><td>59.6</td><td>最低点</td></tr><tr><td>120㎡ 以上</td><td>1,849</td><td><strong>87.7</strong></td><td><strong>反弹</strong></td></tr></tbody></table></div>
+<figure class="fig"><svg xmlns="http://www.w3.org/2000/svg" width="820" height="430" viewBox="0 0 820 430" font-family="'Microsoft YaHei','PingFang SC',sans-serif"><rect width="820" height="430" fill="#ffffff"/>
+<text x="62" y="34" font-size="17" fill="#1f2328" text-anchor="start" font-weight="700">面积段与租金单价：90–120㎡ 最低，120㎡ 以上反弹</text>
+<text x="62" y="54" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal">元/㎡/月　｜　相关系数仅 -0.048，但分箱后规律清晰</text>
+<line x1="62" y1="352.0" x2="790" y2="352.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="356.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<line x1="62" y1="280.5" x2="790" y2="280.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="284.5" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">26</text>
+<line x1="62" y1="209.0" x2="790" y2="209.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="213.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">52</text>
+<line x1="62" y1="137.5" x2="790" y2="137.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="141.5" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">78</text>
+<line x1="62" y1="66.0" x2="790" y2="66.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="70.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">104</text>
+<rect x="105.8" y="109.9" width="58.0" height="242.1" fill="#94a3b8" rx="3"/>
+<text x="134.8" y="102.86334952258235" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">87.7</text>
+<text x="134.8" y="372" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">120以上</text>
+<rect x="251.4" y="109.6" width="58.0" height="242.4" fill="#94a3b8" rx="3"/>
+<text x="280.4" y="102.62711864406776" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">87.8</text>
+<text x="280.4" y="372" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">30-60</text>
+<rect x="397.0" y="122.5" width="58.0" height="229.5" fill="#94a3b8" rx="3"/>
+<text x="426.0" y="115.50809792843688" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">83.1</text>
+<text x="426.0" y="372" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">30以下</text>
+<rect x="542.6" y="171.9" width="58.0" height="180.1" fill="#0f766e" rx="3"/>
+<text x="571.5999999999999" y="164.89332007332808" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">65.2</text>
+<text x="571.5999999999999" y="372" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">60-90</text>
+<rect x="688.2" y="187.4" width="58.0" height="164.6" fill="#94a3b8" rx="3"/>
+<text x="717.1999999999999" y="180.39150641856287" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">59.6</text>
+<text x="717.1999999999999" y="372" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">90-120</text>
+</svg><figcaption>面积段与单价</figcaption></figure>
+<p><strong>业务含义</strong>：</p>
+<ul><li>从 30㎡ 到 120㎡，单价从 98.8 一路降到 59.6，<strong>规模效应成立</strong>——面积越大，单位面积越便宜。这与回归得到的面积弹性 0.854（小于 1）一致。</li><li><strong>但 120㎡ 以上单价反弹到 87.7，打破了这一规律。</strong> 说明大户型里混着高单价豪宅（高端改善型房源），不是单纯的"越大越便宜"。</li><li>所以"面积越大单价越低"这个说法只在 120㎡ 以内成立。<strong>相关系数 -0.048 之所以接近零，正是因为两端方向相反、互相抵消。</strong></li></ul>
+<p><strong>对租客的直接含义</strong>：<strong>90–120㎡ 是单位成本最低的区间</strong>（59.6 元/㎡/月）。如果考虑合租或整租分摊，这个面积段的人均成本最优。</p>
+<hr>
+<h2>5. 建模与验证</h2>
+<h3>5.1 模型选择</h3>
+<p>对 <code>log(租金)</code> 做多元线性回归，方法是最小二乘（<code>numpy.linalg.lstsq</code>）。</p>
+<p><strong>为什么用 log 而不是原始租金</strong>：租金右偏（偏度 4.41），取对数后分布接近正态，残差更符合回归假设；且系数可以直接解释为<strong>百分比变化</strong>（<code>exp(β) - 1</code>），比原始尺度的系数更好用。</p>
+<p><strong>为什么不用随机森林</strong>：本次分析环境只有 pandas + numpy，无 sklearn。与其堆一个跑不起来的树模型，不如把一个能跑通、系数可解释的回归做扎实。线性回归的系数能直接翻译成"带电梯贵 14%"，树模型的特征重要性做不到这一点。</p>
+<p><strong>特征</strong>：<code>log(面积)</code>、房间数、厅数、卫生间数、地铁距离（含缺失标记）、装修、朝向、区县（39 维）。</p>
+<blockquote><p><strong>一个必须避免的错误</strong>：不要同时把 <code>city</code> 和 <code>district</code> 放进模型。区县从属于城市，两者高度共线，同时放入会让系数互相抢解释力——实测会出现"北京比上海低 25%"这种与描述统计（北京 92.9 &gt; 上海 80.5）直接矛盾的系数。本模型保留 <code>district</code>（粒度更细），城市差异用 4.2 节的分组统计呈现。</p></blockquote>
+<h3>5.2 评估结果</h3>
+<div class="tw"><table><thead><tr><th>指标</th><th>数值</th></tr></thead><tbody><tr><td>训练集 R²</td><td>0.7798</td></tr><tr><td><strong>测试集 R²</strong></td><td><strong>0.7761</strong></td></tr><tr><td>测试集 MAE</td><td><strong>1,846 元/月</strong></td></tr><tr><td>测试集 MAPE</td><td>30.2%</td></tr><tr><td>建模样本</td><td>10,383 条（排除合租 339 条）</td></tr></tbody></table></div>
+<p><strong>如何解读 0.776</strong>：住房租金的截面数据，R² 在 0.6–0.8 属于正常区间，因为房龄、采光、装修细节、房东心态、议价空间等大量因素不在数据里。训练集与测试集 R² 只差 0.004，说明<strong>没有明显过拟合</strong>。</p>
+<p>但 MAPE 30.2% 说明点预测不够准——<strong>这是本模型的实际边界</strong>。所以下面的结论都用"区间"和"相对比较"表述，不做精确点估计。</p>
+<h3>5.3 回归系数（真实溢价幅度）</h3>
+<p><strong>基准组</strong>：区县 = 丰台，装修 = 未标注，朝向 = 不含南。</p>
+<div class="tw"><table><thead><tr><th>变量</th><th>系数效应</th><th>解读</th></tr></thead><tbody><tr><td><strong>面积弹性</strong></td><td><strong>0.854</strong></td><td>面积每增 1%，租金增 0.85%（弹性 &lt; 1 = 规模效应）</td></tr><tr><td>卫生间数</td><td><strong>+14.8%</strong> / 每个</td><td>控制面积后，多一个卫生间贵 14.8%</td></tr><tr><td><strong>精装</strong></td><td><strong>+14.2%</strong></td><td>相对未标注（不是相对毛坯）</td></tr><tr><td>地铁距离</td><td><strong>-9.7%</strong> / 每公里</td><td>每远离地铁 1 公里，租金降 9.7%</td></tr><tr><td>房间数</td><td>-2.7% / 每间</td><td>面积固定时，房间越多每间越小，总租金反而略低</td></tr><tr><td>厅数</td><td>-0.2%</td><td>无显著影响</td></tr><tr><td>朝南</td><td>-3.7%</td><td><strong>反直觉，见下方说明</strong></td></tr></tbody></table></div>
+<p><strong>区县效应</strong>（相对丰台）：长宁 <strong>+52.3%</strong>、黄浦 +51.5%、西城 +47.0%、南山区 +43.9%；增城 <strong>-63.5%</strong>、番禺 -52.6%、荔湾 -50.7%、白云 -47.1%。</p>
+<figure class="fig"><svg xmlns="http://www.w3.org/2000/svg" width="760" height="290" viewBox="0 0 760 290" font-family="'Microsoft YaHei','PingFang SC',sans-serif"><rect width="760" height="290" fill="#ffffff"/>
+<text x="56" y="32" font-size="16" fill="#1f2328" text-anchor="start" font-weight="700">回归系数效应（相对基准组）</text>
+<text x="56" y="52" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal">面积弹性为「面积涨1%时租金涨0.85%」，此处折算为百分比便于同图比较</text>
+<line x1="391.0" y1="54" x2="391.0" y2="242" stroke="#e5e7eb" stroke-width="1.5"/>
+<rect x="391.0" y="62.0" width="218.5" height="17" fill="#0f766e" rx="2" opacity="0.88"/>
+<text x="84" y="75" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">面积弹性</text>
+<text x="617.5185185185185" y="75" font-size="12" fill="#1f2328" text-anchor="start" font-weight="700">+85.4%</text>
+<rect x="391.0" y="92.0" width="37.9" height="17" fill="#0f766e" rx="2" opacity="0.88"/>
+<text x="84" y="105" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">卫生间/个</text>
+<text x="436.869719836933" y="105" font-size="12" fill="#1f2328" text-anchor="start" font-weight="700">+14.8%</text>
+<rect x="391.0" y="122.0" width="36.3" height="17" fill="#0f766e" rx="2" opacity="0.88"/>
+<text x="84" y="135" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">精装</text>
+<text x="435.33446092462486" y="135" font-size="12" fill="#1f2328" text-anchor="start" font-weight="700">+14.2%</text>
+<rect x="366.2" y="152.0" width="24.8" height="17" fill="#b45309" rx="2" opacity="0.88"/>
+<text x="84" y="165" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">地铁/公里</text>
+<text x="358.17998091768584" y="165" font-size="12" fill="#1f2328" text-anchor="end" font-weight="700">-9.7%</text>
+<rect x="384.1" y="182.0" width="6.9" height="17" fill="#b45309" rx="2" opacity="0.88"/>
+<text x="84" y="195" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">房间数/间</text>
+<text x="376.09133489461357" y="195" font-size="12" fill="#1f2328" text-anchor="end" font-weight="700">-2.7%</text>
+<rect x="381.5" y="212.0" width="9.5" height="17" fill="#b45309" rx="2" opacity="0.88"/>
+<text x="84" y="225" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">朝南</text>
+<text x="373.53257004076676" y="225" font-size="12" fill="#1f2328" text-anchor="end" font-weight="700">-3.7%</text>
+</svg><figcaption>回归系数效应</figcaption></figure>
+<p><strong>关于"朝南 -3.7%"这个反直觉结果</strong>：控制区县、面积、户型之后，朝南系数为负。这<strong>不能</strong>解读为"朝南不值钱"。可能的原因是：数据里朝南的房源占 62.5%，其中大量是「南北通透」的老小区房源，而<strong>房龄这个关键变量不在数据中</strong>。房龄老 → 单价低 → 被错误地归因到"朝南"上。</p>
+<p>这是<strong>遗漏变量偏误</strong>的教科书案例。它同时也是本模型最大的局限：所有系数只能解释为<strong>相关关系</strong>，不能当作因果结论。</p>
+<h3>5.4 特征影响力排序</h3>
+<p>按标准化系数绝对值（消除量纲影响后可比）排序，前几位：</p>
+<div class="tw"><table><thead><tr><th>排序</th><th>特征</th><th>影响力</th><th>方向</th></tr></thead><tbody><tr><td>1</td><td>log(面积)</td><td>0.489</td><td>正向</td></tr><tr><td>2</td><td>区县·南山区</td><td>0.169</td><td>正向</td></tr><tr><td>3</td><td>区县·天河</td><td>0.143</td><td>正向</td></tr><tr><td>4</td><td>区县·福田区</td><td>0.138</td><td>正向</td></tr><tr><td>5</td><td>区县·松江</td><td>-0.130</td><td>负向</td></tr><tr><td>6</td><td>区县·越秀</td><td>0.129</td><td>正向</td></tr><tr><td>7</td><td>卫生间数</td><td>0.093</td><td>正向</td></tr></tbody></table></div>
+<p><strong>业务含义</strong>：面积是单一影响最大的变量，但<strong>区位（区县）作为一个整体，影响力超过面积</strong>——前 7 位里有 5 个是区县虚拟变量。这与 4.2 节的描述统计结论一致：区位是租金的第一解释变量。</p>
+<h3>5.5 残差诊断</h3>
+<p>模型误差最大的样本集中在两类：</p>
+<ul><li><strong>高估</strong>（实际租金远低于预测）：挂牌价明显偏高的房源，或存在硬伤（临街、采光差）但数据中没有体现。</li><li><strong>低估</strong>（实际租金远高于预测）：高端装修、特殊景观（江景、学区）的房源，这些溢价因素不在字段里。</li></ul>
+<p><strong>业务含义</strong>：残差偏离超过 ±30% 的房源，恰恰是<strong>价格异常识别规则</strong>的候选——要么是钓鱼盘、要么有未披露的硬伤、要么是被低估的好房源。这把模型误差从"缺点"变成了"筛选工具"。</p>
+<hr>
+<h2>6. 结论与建议</h2>
+<h3>6.1 核心结论</h3>
+<ol><li><strong>区位是第一解释变量，且粒度越细越有效。</strong> 城市间差 1.93 倍，区县间差 7.3 倍。判断租金贵不贵，必须先锁定到商圈。</li><li><strong>面积存在规模效应，但 120㎡ 以上失效。</strong> 面积弹性 0.854，90–120㎡ 单位成本最低（59.6 元/㎡/月），超过 120㎡ 单价反弹至 87.7。</li><li><strong>控制区位后，功能性属性（卫生间、装修）和通勤属性（地铁距离）才是真正的溢价来源</strong>：多一个卫生间 +14.8%，精装 +14.2%，距地铁每公里 -9.7%。</li><li><strong>公开属性可解释约 78% 的租金波动</strong>，剩下 22% 由房龄、采光、议价空间等未观测因素决定。</li></ol>
+<h3>6.2 分角色建议</h3>
+<div class="tw"><table><thead><tr><th>角色</th><th>建议</th><th>依据</th></tr></thead><tbody><tr><td><strong>租客</strong></td><td>先锁定商圈，用该商圈 P25–P75 价格带作为比价基准；低于 P25 的房源优先看</td><td>4.3 节</td></tr><tr><td><strong>租客</strong></td><td>若追求单位面积成本最低，选 90–120㎡ 区间；若只求总价低，30㎡ 以下小户型单价虽高但总价低</td><td>4.5 节</td></tr><tr><td><strong>租客</strong></td><td>同一套房源，距地铁每远 1 公里可要求约 10% 的价格让步</td><td>5.3 节</td></tr><tr><td><strong>房东 / 中介</strong></td><td>挂牌定价 = 所在商圈中位单价 × 面积 × (1 + 装修调整 14% + 卫生间调整 15% × 个数)</td><td>5.3 节</td></tr><tr><td><strong>平台运营</strong></td><td>用模型残差作为价格异常识别规则：残差偏离超过 ±30% 的房源进入人工复核队列</td><td>5.5 节</td></tr></tbody></table></div>
+<hr>
+<h2>7. 局限性</h2>
+<div class="tw"><table><thead><tr><th>维度</th><th>局限</th><th>影响</th><th>应对</th></tr></thead><tbody><tr><td><strong>数据时效</strong></td><td>采集于 2020 年 8 月，距今数年</td><td>绝对租金水平已失效</td><td>定位为历史快照分析；只强调价格<strong>结构</strong>关系，不判断当下水平</td></tr><tr><td><strong>价格口径</strong></td><td>挂牌价 ≠ 成交价，存在议价空间</td><td>绝对租金偏高；溢价幅度估计有偏</td><td>全部表述为"挂牌租金"；结论侧重相对比较</td></tr><tr><td><strong>变量完整性</strong></td><td>缺房龄、采光、学区、装修细节、物业品质</td><td><strong>遗漏变量偏误</strong>（朝南系数为负即为此例）</td><td>声明为相关关系；用残差分析标注未解释部分的来源</td></tr><tr><td><strong>样本偏差</strong></td><td>链家平台房源以中介代理为主，个人直租少</td><td>可能系统性偏向某一类房源</td><td>明确标注来源；不外推至全部租房市场</td></tr><tr><td><strong>每城 3000 条</strong></td><td>每城市固定采样，非全量</td><td>小商圈样本量不足，价格带不稳定</td><td>商圈分析设样本量门槛（≥10 条）</td></tr><tr><td><strong>模型能力</strong></td><td>单一时点截面，未做时空交叉验证</td><td>跨时间泛化能力未验证</td><td>定位为预估基线；用误差区间代替点估计</td></tr><tr><td><strong>数据规模</strong></td><td>1.2 万条，单机可处理</td><td>不构成严格意义的"大数据"场景</td><td>如实说明量级判断，分布式实现仅作扩展</td></tr></tbody></table></div>
+<hr>
+<h2>8. 附录</h2>
+<h3>8.1 代码结构</h3>
+<div class="tw"><table><thead><tr><th>文件</th><th>职责</th></tr></thead><tbody><tr><td><code>cleaning_eda.py</code></td><td>清洗流水线 + 探索性分析</td></tr><tr><td><code>modelling.py</code></td><td>特征工程 + 回归建模 + 评估 + 残差诊断</td></tr><tr><td><code>data/cleaning_log.csv</code></td><td>清洗对账表</td></tr><tr><td><code>data/model_results.csv</code></td><td>回归系数明细</td></tr></tbody></table></div>
+<h3>8.2 复现步骤</h3>
+<pre class="code"><code># 1. 数据体检
+python cleaning_eda.py --in data/rent_raw.csv --inspect
+
+# 2. 清洗 + EDA（输出 clean.csv / 日志 / 图表）
+python cleaning_eda.py --in data/rent_raw.csv
+
+# 3. 建模
+python modelling.py</code></pre>
+<h3>8.3 环境</h3>
+<ul><li>Python 3.7+</li><li>pandas 1.3+、numpy 1.21+</li><li>图表：matplotlib（可选，缺失时自动跳过绘图）</li></ul>
+<hr>
+<p>*本报告数据仅用于学习研究，不用于商业用途。*</p>
+</div>
+</body>
+</html>
