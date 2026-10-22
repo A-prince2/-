@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>城市租房数据集分析报告</title>
 <style>
-  :root{--tx:#1a1d22;--tx2:#4a5260;--tx3:#7b8494;--line:#e3e7ee;--acc:#0f766e;--accbg:#f0fdfa;}
+  :root{--tx:#1a1d22;--tx2:#4a5260;--tx3:#7b8494;--line:#e3e7ee;
+        --acc:#0f766e;--accbg:#f0fdfa;}
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#f7f8fa;color:var(--tx);
     font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
@@ -42,6 +43,8 @@
     border:1px solid var(--line);border-radius:6px;text-align:center}
   figure.fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
   figcaption{font-size:12.5px;color:var(--tx3);margin-top:10px}
+  .ph-img{border:2px dashed #cbd5e1;background:#f8fafc;border-radius:6px;
+    padding:34px 20px;margin:18px 0;text-align:center;color:var(--tx3);font-size:13px}
   @media print{body{background:#fff;padding:0}
     .paper{box-shadow:none;padding:0;max-width:100%}
     h2{page-break-after:avoid} table,pre,figure{page-break-inside:avoid}}
@@ -67,6 +70,11 @@
 <p>由此产生三方困境：</p>
 <div class="tw"><table><thead><tr><th>角色</th><th>困境</th><th>需要什么</th></tr></thead><tbody><tr><td>租客</td><td>无法判断价格是否合理，只能凭经验横向比价</td><td>同区位同类型的价格参照</td></tr><tr><td>房东 / 中介</td><td>缺少定价依据，挂高空置、挂低损失</td><td>属性对租金的量化影响</td></tr><tr><td>平台运营</td><td>缺少房源价格合理性的度量指标</td><td>可自动化的价格异常识别规则</td></tr></tbody></table></div>
 <p><strong>分析目标</strong>：把"租金是否合理"这一经验判断，转化为可量化、可验证的指标与模型。</p>
+<h3>1.3 选题考量</h3>
+<p>这个项目在动手前，先按四条标准筛选题目：</p>
+<div class="tw"><table><thead><tr><th>标准</th><th>为什么重要</th><th>租房数据的符合情况</th></tr></thead><tbody><tr><td><strong>数据能合法获取</strong></td><td>学生项目最容易卡在第一步就踩红线</td><td>链家自身 robots 为 <code>User-agent: *</code> + <code>Disallow: /*</code>，全站禁止普通爬虫；因此改用社区公开的 CC0 数据集</td></tr><tr><td><strong>字段结构能支撑完整链路</strong></td><td>只有两列数字的数据，做不出特征工程与建模</td><td>20 个字段中数值、类别、文本三类齐全</td></tr><tr><td><strong>有真实业务场景</strong></td><td>没有场景的分析只是练习题</td><td>租客比价、房东定价、平台价格异常识别，三方需求明确</td></tr><tr><td><strong>数据规模与方法匹配</strong></td><td>太大需引入分布式，太小做不出统计结论</td><td>1.2 万条：统计上足够，单机可在秒级完成，无需 Spark</td></tr></tbody></table></div>
+<p>此外还有一条容易被忽略的考量：<strong>沟通成本</strong>。「南山区比龙岗区贵一倍」这类结论不需要行业背景就能听懂，讲述与评审的成本都更低。</p>
+<p>选题过程中也排除了两类方向：一是自建爬虫采集（目标站点协议禁止），二是纯文本类分析（与数据分析岗的匹配度低于结构化数据）。最终留下的题目，是四条标准共同筛出的结果。</p>
 <hr>
 <h2>2. 数据说明</h2>
 <h3>2.1 数据来源</h3>

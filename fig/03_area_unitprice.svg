@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="430" viewBox="0 0 820 430" font-family="'Microsoft YaHei','PingFang SC',sans-serif"><rect width="820" height="430" fill="#ffffff"/>
+<text x="62" y="34" font-size="17" fill="#1f2328" text-anchor="start" font-weight="700">面积段与租金单价：90–120㎡ 最低，120㎡ 以上反弹</text>
+<text x="62" y="54" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal">元/㎡/月　｜　相关系数仅 -0.048，但分箱后规律清晰</text>
+<line x1="62" y1="352.0" x2="790" y2="352.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="356.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<line x1="62" y1="280.5" x2="790" y2="280.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="284.5" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">26</text>
+<line x1="62" y1="209.0" x2="790" y2="209.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="213.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">52</text>
+<line x1="62" y1="137.5" x2="790" y2="137.5" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="141.5" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">78</text>
+<line x1="62" y1="66.0" x2="790" y2="66.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="70.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">104</text>
+<rect x="105.8" y="109.9" width="58.0" height="242.1" fill="#94a3b8" rx="3"/>
+<text x="134.8" y="102.86334952258235" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">87.7</text>
+<text x="134.8" y="372" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">120以上</text>
+<rect x="251.4" y="109.6" width="58.0" height="242.4" fill="#94a3b8" rx="3"/>
+<text x="280.4" y="102.62711864406776" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">87.8</text>
+<text x="280.4" y="372" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">30-60</text>
+<rect x="397.0" y="122.5" width="58.0" height="229.5" fill="#94a3b8" rx="3"/>
+<text x="426.0" y="115.50809792843688" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">83.1</text>
+<text x="426.0" y="372" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">30以下</text>
+<rect x="542.6" y="171.9" width="58.0" height="180.1" fill="#0f766e" rx="3"/>
+<text x="571.5999999999999" y="164.89332007332808" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">65.2</text>
+<text x="571.5999999999999" y="372" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">60-90</text>
+<rect x="688.2" y="187.4" width="58.0" height="164.6" fill="#94a3b8" rx="3"/>
+<text x="717.1999999999999" y="180.39150641856287" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">59.6</text>
+<text x="717.1999999999999" y="372" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">90-120</text>
+</svg>

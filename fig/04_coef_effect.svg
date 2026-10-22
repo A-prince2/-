@@ -1,0 +1,23 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="760" height="290" viewBox="0 0 760 290" font-family="'Microsoft YaHei','PingFang SC',sans-serif"><rect width="760" height="290" fill="#ffffff"/>
+<text x="56" y="32" font-size="16" fill="#1f2328" text-anchor="start" font-weight="700">回归系数效应（相对基准组）</text>
+<text x="56" y="52" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal">面积弹性为「面积涨1%时租金涨0.85%」，此处折算为百分比便于同图比较</text>
+<line x1="391.0" y1="54" x2="391.0" y2="242" stroke="#e5e7eb" stroke-width="1.5"/>
+<rect x="391.0" y="62.0" width="218.5" height="17" fill="#0f766e" rx="2" opacity="0.88"/>
+<text x="84" y="75" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">面积弹性</text>
+<text x="617.5185185185185" y="75" font-size="12" fill="#1f2328" text-anchor="start" font-weight="700">+85.4%</text>
+<rect x="391.0" y="92.0" width="37.9" height="17" fill="#0f766e" rx="2" opacity="0.88"/>
+<text x="84" y="105" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">卫生间/个</text>
+<text x="436.869719836933" y="105" font-size="12" fill="#1f2328" text-anchor="start" font-weight="700">+14.8%</text>
+<rect x="391.0" y="122.0" width="36.3" height="17" fill="#0f766e" rx="2" opacity="0.88"/>
+<text x="84" y="135" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">精装</text>
+<text x="435.33446092462486" y="135" font-size="12" fill="#1f2328" text-anchor="start" font-weight="700">+14.2%</text>
+<rect x="366.2" y="152.0" width="24.8" height="17" fill="#b45309" rx="2" opacity="0.88"/>
+<text x="84" y="165" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">地铁/公里</text>
+<text x="358.17998091768584" y="165" font-size="12" fill="#1f2328" text-anchor="end" font-weight="700">-9.7%</text>
+<rect x="384.1" y="182.0" width="6.9" height="17" fill="#b45309" rx="2" opacity="0.88"/>
+<text x="84" y="195" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">房间数/间</text>
+<text x="376.09133489461357" y="195" font-size="12" fill="#1f2328" text-anchor="end" font-weight="700">-2.7%</text>
+<rect x="381.5" y="212.0" width="9.5" height="17" fill="#b45309" rx="2" opacity="0.88"/>
+<text x="84" y="225" font-size="12.5" fill="#1f2328" text-anchor="end" font-weight="normal">朝南</text>
+<text x="373.53257004076676" y="225" font-size="12" fill="#1f2328" text-anchor="end" font-weight="700">-3.7%</text>
+</svg>

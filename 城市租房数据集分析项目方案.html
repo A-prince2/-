@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>城市租房数据集分析 · 项目方案</title>
+<style>
+  :root{
+    --bg:#0f1115; --bg2:#14181f; --card:#171c24; --line:#252c37;
+    --tx:#e7ebf2; --tx2:#98a3b3; --tx3:#6b7686;
+    --acc:#5ee0c8; --acc-dim:#1e4d47; --warn:#e8ab5c; --warn-dim:#3d2f1c;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--bg); color:var(--tx);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:15px; line-height:1.85; letter-spacing:.01em;
+    padding:0 20px 100px;
+  }
+  .wrap{max-width:900px;margin:0 auto}
+  header{padding:64px 0 40px;border-bottom:1px solid var(--line);margin-bottom:8px}
+  .kicker{font-size:12px;letter-spacing:.22em;color:var(--acc);text-transform:uppercase;margin-bottom:18px}
+  h1{font-size:34px;line-height:1.3;font-weight:600;letter-spacing:-.01em}
+  .sub{color:var(--tx2);font-size:15px;margin-top:12px;max-width:640px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+  .tag{font-size:12px;color:var(--tx2);border:1px solid var(--line);background:var(--bg2);
+       padding:5px 12px;border-radius:100px;white-space:nowrap}
+  .tag b{color:var(--tx);font-weight:500}
+  section{padding:52px 0 8px;border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:none}
+  h2{font-size:13px;letter-spacing:.18em;color:var(--acc);font-weight:600;
+     text-transform:uppercase;margin-bottom:8px;display:flex;align-items:baseline;gap:12px}
+  h2 .n{font-size:11px;color:var(--tx3);letter-spacing:.1em;font-weight:400}
+  h3{font-size:19px;font-weight:600;margin:30px 0 12px;letter-spacing:-.005em}
+  h3:first-of-type{margin-top:22px}
+  h4{font-size:14px;font-weight:600;color:var(--tx);margin:0 0 6px}
+  p{color:var(--tx2);margin-bottom:14px}
+  p strong{color:var(--tx);font-weight:600}
+  ul{margin:0 0 14px 0;list-style:none}
+  li{color:var(--tx2);padding-left:18px;position:relative;margin-bottom:7px}
+  li::before{content:"";position:absolute;left:2px;top:12px;width:5px;height:1px;background:var(--acc);opacity:.7}
+  li b{color:var(--tx);font-weight:600}
+  .tw{overflow-x:auto;margin:16px 0 20px;border:1px solid var(--line);border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:520px}
+  th{text-align:left;padding:12px 16px;background:var(--bg2);color:var(--tx);
+     font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+     border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:11px 16px;border-bottom:1px solid rgba(37,44,55,.6);color:var(--tx2);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td b{color:var(--tx);font-weight:600}
+  code{font-family:"SF Mono",Consolas,Monaco,monospace;font-size:12.5px;
+       background:rgba(94,224,200,.08);color:var(--acc);padding:1px 6px;border-radius:4px}
+  .flow{margin:22px 0 8px;position:relative;padding-left:6px}
+  .step{position:relative;padding:0 0 26px 34px;border-left:1px solid var(--line)}
+  .step:last-child{border-left-color:transparent;padding-bottom:6px}
+  .step::before{content:attr(data-i);position:absolute;left:-13px;top:0;
+    width:25px;height:25px;border-radius:50%;background:var(--bg);border:1px solid var(--acc-dim);
+    color:var(--acc);font-size:11px;display:flex;align-items:center;justify-content:center;
+    font-family:"SF Mono",Consolas,monospace}
+  .step .t{font-size:15px;font-weight:600;color:var(--tx);margin-bottom:3px}
+  .step .d{font-size:13.5px;color:var(--tx2);line-height:1.75}
+  .step .o{font-size:12.5px;color:var(--tx3);margin-top:6px}
+  .step .o em{font-style:normal;color:var(--acc);opacity:.85}
+  .grid{display:grid;gap:12px;margin:18px 0 22px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:700px){.g2{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+  .card .lbl{font-size:11px;letter-spacing:.14em;color:var(--acc);text-transform:uppercase;margin-bottom:8px}
+  .card p{margin:0;font-size:13.5px;line-height:1.75}
+  .q{background:var(--card);border:1px solid var(--line);border-left:2px solid var(--acc);
+     border-radius:0 10px 10px 0;padding:20px 22px;margin-bottom:14px}
+  .q .qh{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+  .q .qi{font-family:"SF Mono",Consolas,monospace;font-size:12px;color:var(--acc);
+     border:1px solid var(--acc-dim);border-radius:5px;padding:2px 7px;flex-shrink:0;margin-top:2px}
+  .q .qt{font-size:15.5px;font-weight:600;color:var(--tx);line-height:1.6}
+  .q dl{display:grid;grid-template-columns:64px 1fr;gap:6px 14px;font-size:13.5px;margin:0}
+  .q dt{color:var(--tx3);font-size:12.5px;padding-top:2px}
+  .q dd{color:var(--tx2);line-height:1.75}
+  .q dd b{color:var(--tx);font-weight:600}
+  .copy{position:relative;background:#0b0e13;border:1px solid var(--line);border-radius:10px;
+        padding:22px 24px;margin:16px 0 22px;font-size:13.5px;line-height:1.9;color:#cfd6e2}
+  .copy .hint{position:absolute;top:10px;right:14px;font-size:11px;color:var(--tx3);letter-spacing:.1em}
+  .copy b{color:var(--tx);font-weight:600}
+  .fill{background:var(--warn-dim);color:var(--warn);border-radius:4px;padding:0 5px;font-size:12.5px}
+  .copy .dim{color:var(--tx3)}
+  .note{border:1px solid var(--warn-dim);background:rgba(232,171,92,.05);border-radius:10px;
+        padding:16px 20px;margin:16px 0 22px}
+  .note .nt{font-size:12px;letter-spacing:.12em;color:var(--warn);margin-bottom:6px;text-transform:uppercase}
+  .note p{margin:0;font-size:13.5px;color:var(--tx2);line-height:1.75}
+  .note p strong{color:#f0d3a4}
+  footer{padding:40px 0 0;color:var(--tx3);font-size:12.5px;line-height:1.9;border-top:1px solid var(--line);margin-top:40px}
+  @media(max-width:600px){
+    body{font-size:14.5px;padding:0 16px 70px}
+    h1{font-size:26px} header{padding:44px 0 32px}
+    section{padding:40px 0 6px}
+    .q dl{grid-template-columns:1fr;gap:2px}
+    .q dt{margin-top:6px}
+    .copy{padding:18px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Portfolio Project · Data Analysis</div>
+  <h1>城市租房数据集分析</h1>
+  <p class="sub">面向数据分析 / 数据运营岗位的求职项目方案：以城市租房挂牌数据为对象，完成从数据获取、清洗建模到结论交付的完整分析链路。</p>
+  <div class="meta">
+    <span class="tag">项目定位 <b>个人作品集</b></span>
+    <span class="tag">专业 <b>大数据技术</b></span>
+    <span class="tag">分析对象 <b>城市租房挂牌数据</b></span>
+    <span class="tag">产出 <b>分析报告 + 可视化看板 + 预估模型</b></span>
+  </div>
+</header>
+
+<section>
+  <h2><span class="n">01</span>项目背景与业务目标</h2>
+
+  <h3>1.1 背景</h3>
+  <p>城市租房市场的信息长期处于<strong>分散且不透明</strong>的状态。房源分散在多个平台与中介渠道，租金水平受区位、面积、户型、装修、楼层等多重因素共同影响，但市场缺乏公开、量化、可复现的定价参照体系。</p>
+  <p>这直接导致三方困境：租客难以判断一套房源是"贵"还是"正常"，只能凭个人经验横向比价；房东与中介缺少定价依据，挂高则空置周期拉长，挂低则损失收益；租房平台的运营岗则需要一套可度量房源质量与价格合理性的指标体系，用于房源分层与推荐排序。</p>
+  <p>本项目以某城市租房挂牌数据为样本，尝试用数据分析方法把"租金是否合理"这一经验判断，转化为<strong>可量化、可验证</strong>的指标与模型。</p>
+
+  <h3>1.2 业务目标</h3>
+  <div class="grid g2">
+    <div class="card">
+      <div class="lbl">Objective 01</div>
+      <h4>建立租金影响因素的量化认知</h4>
+      <p>识别区位、面积、户型、装修、楼层、电梯等属性对租金的影响方向与相对强度，输出影响因子排序，替代"凭感觉判断"。</p>
+    </div>
+    <div class="card">
+      <div class="lbl">Objective 02</div>
+      <h4>构建同商圈可比价基线</h4>
+      <p>以商圈 / 板块为单位计算租金单价基准区间，形成"同区位同类型房源的合理价格带"，作为溢价或折价的判断标尺。</p>
+    </div>
+    <div class="card">
+      <div class="lbl">Objective 03</div>
+      <h4>识别高性价比房源</h4>
+      <p>基于残差思路构建性价比指标，从挂牌房源中筛出"同等条件下租金显著偏低"的样本，输出可解释的推荐清单。</p>
+    </div>
+    <div class="card">
+      <div class="lbl">Objective 04</div>
+      <h4>验证租金可预测性边界</h4>
+      <p>用房源结构化属性建立租金预估基线模型，并明确误差区间，说明仅靠公开属性信息能在多大程度上解释租金差异。</p>
+    </div>
+  </div>
+
+  <p><strong>交付对象与用途：</strong>租客侧作为选房比价工具；房东 / 中介侧作为挂牌定价参考；平台运营侧作为房源分层与价格异常识别的规则来源。</p>
+</section>
+
+<section>
+  <h2><span class="n">02</span>项目整体流程架构</h2>
+  <p>项目按"数据获取 → 清洗存储 → 特征工程 → 探索分析 → 建模验证 → 可视化交付 → 结论落地"七个阶段推进，每阶段有明确的产物与验收标准，保证分析过程可复现。</p>
+
+  <div class="flow">
+    <div class="step" data-i="1">
+      <div class="t">数据获取</div>
+      <div class="d">确定数据来源与字段口径，完成原始数据采集或公开数据集导入，记录采集时间与字段字典，保证可追溯。</div>
+      <div class="o">产物：<em>raw 原始数据表 + 字段字典</em></div>
+    </div>
+    <div class="step" data-i="2">
+      <div class="t">数据清洗与存储</div>
+      <div class="d">处理缺失值、重复房源、单位不统一、字段串写、逻辑矛盾与极端异常值；按分层思路落库（原始层 / 明细层 / 汇总层）。</div>
+      <div class="o">产物：<em>清洗后明细表 + 清洗规则说明文档</em></div>
+    </div>
+    <div class="step" data-i="3">
+      <div class="t">特征工程</div>
+      <div class="d">从原始字段派生分析用特征：租金单价、户型拆解（室 / 厅 / 卫）、楼层相对位置、房龄分段、商圈编码、装修等级映射等。</div>
+      <div class="o">产物：<em>建模宽表 + 特征说明表</em></div>
+    </div>
+    <div class="step" data-i="4">
+      <div class="t">探索性分析（EDA）</div>
+      <div class="d">分布检验、分组对比、相关性分析，验证数据质量与初步业务假设，形成问题清单与假设清单。</div>
+      <div class="o">产物：<em>EDA 图表集 + 假设清单</em></div>
+    </div>
+    <div class="step" data-i="5">
+      <div class="t">建模与验证</div>
+      <div class="d">建立租金预估基线模型，对比线性回归与树模型的解释力与误差，输出特征重要性排序与误差分布。</div>
+      <div class="o">产物：<em>模型评估报告（R² / MAE / 误差区间）</em></div>
+    </div>
+    <div class="step" data-i="6">
+      <div class="t">可视化与看板</div>
+      <div class="d">将核心结论封装为可交互看板：租金热力分布、影响因素贡献、性价比房源榜单、预估工具。</div>
+      <div class="o">产物：<em>可视化看板 / 交互页面</em></div>
+    </div>
+    <div class="step" data-i="7">
+      <div class="t">结论与建议</div>
+      <div class="d">按租客 / 房东 / 平台三类角色输出差异化结论与可执行建议，明确结论的适用边界。</div>
+      <div class="o">产物：<em>分析报告 + 结论摘要</em></div>
+    </div>
+  </div>
+
+  <h3>技术选型与理由</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>环节</th><th>技术</th><th>选型理由</th></tr></thead>
+      <tbody>
+        <tr><td><b>采集</b></td><td>Python（requests / BeautifulSoup）</td><td>处理公开列表页字段，配合限速与重试，适用于中小规模采集</td></tr>
+        <tr><td><b>存储</b></td><td>MySQL / SQLite</td><td>数据量为单机可承载级别，关系型结构便于 SQL 聚合与分层建模</td></tr>
+        <tr><td><b>清洗分析</b></td><td>SQL + pandas / numpy</td><td>SQL 负责聚合与指标计算，pandas 负责字段级清洗与特征派生</td></tr>
+        <tr><td><b>建模</b></td><td>scikit-learn</td><td>线性回归提供可解释系数，随机森林 / GBDT 提供精度上限对照</td></tr>
+        <tr><td><b>可视化</b></td><td>Matplotlib / Seaborn / Pyecharts</td><td>静态图用于报告，Pyecharts 输出可交互图表嵌入看板</td></tr>
+        <tr><td><b>工程扩展</b></td><td>Hive / PySpark（可选）</td><td>将清洗层改写为分布式实现，用于体现大数据处理能力，非性能必需</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <div class="nt">关于技术选型的说明（重要）</div>
+    <p>单城市租房挂牌数据的量级通常在 <strong>万条到十万条</strong>，远未达到单机处理瓶颈。本项目采用 pandas + SQL 的单机方案是<strong>基于数据量级的合理判断</strong>，而非能力缺失；分布式框架以扩展层形式保留，用于展示工程实现能力。这一取舍需在面试与报告中主动说明，避免被理解为"不会大数据组件"。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">03</span>数据源说明</h2>
+
+  <h3>3.1 数据来源方案</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>方案</th><th>来源</th><th>优点</th><th>需注意</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>方案 A（推荐）</b></td>
+          <td>公开数据集平台（Kaggle、天池、和鲸社区等）的住房租赁数据</td>
+          <td>合规、可复现、字段齐全，作品集评审可直接复跑</td>
+          <td>需核对数据年份与城市口径，避免使用过时数据</td>
+        </tr>
+        <tr>
+          <td><b>方案 B</b></td>
+          <td>合规范围内的公开列表页字段采集</td>
+          <td>数据新鲜、业务真实感强</td>
+          <td>须遵守 robots 协议与平台条款，控制频率，仅用于学习研究、不二次分发</td>
+        </tr>
+        <tr>
+          <td><b>方案 C</b></td>
+          <td>A + B 结合：公开数据集打底，小样本补充最新挂牌</td>
+          <td>兼顾规模与时效，能体现数据整合能力</td>
+          <td>须统一两套数据的字段口径与单位，做好来源标记</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3.2 字段字典（核心字段）</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>字段</th><th>类型</th><th>说明</th><th>质量风险</th></tr></thead>
+      <tbody>
+        <tr><td><code>house_id</code></td><td>字符</td><td>房源唯一标识</td><td>同房源被多中介挂牌，ID 不同但实体相同</td></tr>
+        <tr><td><code>city / district</code></td><td>字符</td><td>城市、区县</td><td>行政名称新旧混用</td></tr>
+        <tr><td><code>business_area</code></td><td>字符</td><td>商圈 / 板块</td><td>命名不统一，需建映射表归并</td></tr>
+        <tr><td><code>community</code></td><td>字符</td><td>小区名称</td><td>简称、错字导致同一小区多个写法</td></tr>
+        <tr><td><code>area</code></td><td>数值</td><td>建筑面积（㎡）</td><td>单位混杂，"89㎡""89平""89"并存</td></tr>
+        <tr><td><code>layout</code></td><td>字符</td><td>户型（如 2室1厅1卫）</td><td>需拆解为房间数、厅数、卫生间数</td></tr>
+        <tr><td><code>floor / total_floor</code></td><td>数值</td><td>所在楼层 / 总楼层</td><td>存在"低楼层""共18层"等文本描述</td></tr>
+        <tr><td><code>orientation</code></td><td>字符</td><td>朝向</td><td>多朝向组合（南北），缺失率较高</td></tr>
+        <tr><td><code>decoration</code></td><td>字符</td><td>装修情况</td><td>等级划分不统一，需映射为序数变量</td></tr>
+        <tr><td><code>elevator</code></td><td>布尔</td><td>是否带电梯</td><td>缺失值需结合总楼层推断</td></tr>
+        <tr><td><code>rent</code></td><td>数值</td><td>挂牌月租金（元）</td><td>元 / 月与元 / 天混用；存在低价钓鱼房源</td></tr>
+        <tr><td><code>list_date</code></td><td>日期</td><td>挂牌时间</td><td>可派生挂牌时长，用于观察价格调整</td></tr>
+        <tr><td><code>collect_date</code></td><td>日期</td><td>数据采集时间</td><td>必备字段，用于声明数据时效</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>3.3 数据质量处理策略</h3>
+  <ul>
+    <li><b>重复房源：</b>按"小区 + 面积 + 户型 + 租金"组合键识别疑似重复，保留信息完整度最高的一条，并在报告中说明去重规则。</li>
+    <li><b>单位统一：</b>全部换算为"元 / 月"，按日计价数据乘以 30 折算并打标记。</li>
+    <li><b>异常值：</b>以商圈内租金单价的 1% / 99% 分位为界，结合业务常识（如面积小于 5㎡、租金低于市场均值 20%）双重校验，异常样本剔除而非截断，保留剔除清单备查。</li>
+    <li><b>缺失值：</b>缺失率低于 5% 的数值字段用中位数填充，分类字段单列"未知"类；缺失率高于 30% 的字段不进入建模，仅在描述性统计中说明。</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="n">04</span>项目预期分析问题</h2>
+  <p>五个问题按"描述现状 → 诊断成因 → 预测结果 → 指导决策"递进组织，每个问题都对应明确的业务动作，避免只做图表不做判断。</p>
+
+  <div class="q">
+    <div class="qh"><span class="qi">Q1</span><span class="qt">城市租金水平的空间格局如何？各区与商圈的租金梯度差异有多大？</span></div>
+    <dl>
+      <dt>分析口径</dt><dd>以<b>租金单价（元/㎡/月）</b>为核心指标，按区县、商圈两级聚合，计算中位数、四分位区间与离散程度。</dd>
+      <dt>方法</dt><dd>分组统计 + 箱线图对比 + 租金热力分布图；用基尼系数或极差比衡量区域间不均衡程度。</dd>
+      <dt>产出</dt><dd>区域租金梯度排名、各商圈价格带区间、租金高地与洼地清单。</dd>
+      <dt>业务价值</dt><dd>为租客提供区位比价参照；为平台划定高价区与潜力区的运营分区。</dd>
+    </dl>
+  </div>
+
+  <div class="q">
+    <div class="qh"><span class="qi">Q2</span><span class="qt">哪些房源属性对租金影响最显著？影响幅度如何排序？</span></div>
+    <dl>
+      <dt>分析口径</dt><dd>以租金单价为因变量，面积、户型、装修、楼层、电梯、朝向、商圈为自变量，控制区位变量后比较各属性贡献。</dd>
+      <dt>方法</dt><dd>相关性分析筛选变量 → 多元线性回归获取可解释系数 → 随机森林特征重要性交叉验证排序。</dd>
+      <dt>产出</dt><dd>影响因素排序表，以及"带电梯溢价约 X%""精装相对毛坯溢价约 X%"等可量化结论。</dd>
+      <dt>业务价值</dt><dd>把模糊的"装修好所以贵"转化为具体溢价幅度，可直接用于定价沟通与房源卖点提炼。</dd>
+    </dl>
+  </div>
+
+  <div class="q">
+    <div class="qh"><span class="qi">Q3</span><span class="qt">如何在同一商圈内客观识别"高性价比"房源？</span></div>
+    <dl>
+      <dt>分析口径</dt><dd>以商圈内同类房源（面积段 × 户型）的租金单价中位数为基准，计算单个房源的<b>价格偏离度</b>，偏离为负且幅度显著者即为候选高性价比房源。</dd>
+      <dt>方法</dt><dd>分层基准计算 + 残差法（实际单价 − 模型预估单价）/ 预估单价，输出标准化折价率。</dd>
+      <dt>产出</dt><dd>性价比房源榜单，附折价率、可比样本数与主要让价原因推测。</dd>
+      <dt>业务价值</dt><dd>可直接转化为面向租客的推荐清单，或作为平台"优质房源"标签的规则基础。</dd>
+    </dl>
+  </div>
+
+  <div class="q">
+    <div class="qh"><span class="qi">Q4</span><span class="qt">面积与租金的关系是否为线性？是否存在性价比拐点？</span></div>
+    <dl>
+      <dt>分析口径</dt><dd>考察面积与租金单价的关系曲线，检验"面积越大、单价越低"的规模效应是否成立，以及拐点出现的位置。</dd>
+      <dt>方法</dt><dd>面积分箱统计 + 局部趋势拟合 + 分段回归识别斜率变化点。</dd>
+      <dt>产出</dt><dd>面积—单价曲线图，标注性价比最优面积区间及拐点位置。</dd>
+      <dt>业务价值</dt><dd>为租客提供"在哪个面积段花的钱最值"的直接建议，也为合租与整租的决策提供量化依据。</dd>
+    </dl>
+  </div>
+
+  <div class="q">
+    <div class="qh"><span class="qi">Q5</span><span class="qt">能否仅凭房源公开属性预估合理租金区间？误差有多大？</span></div>
+    <dl>
+      <dt>分析口径</dt><dd>以结构化属性为输入预测月租金，评估模型解释力与误差分布，明确"哪些房源难以被准确估值"。</dd>
+      <dt>方法</dt><dd>基线模型（线性回归）对照改进模型（随机森林 / GBDT），以 R²、MAE、MAPE 评估，并用残差分析定位系统性偏差。</dd>
+      <dt>产出</dt><dd>模型评估表、实际值 vs 预测值散点图、误差最大的房源类型识别。</dd>
+      <dt>业务价值</dt><dd>形成"租金预估器"原型，可回答"这套房挂 X 元是否偏离合理区间"，并诚实界定预测能力的上限。</dd>
+    </dl>
+  </div>
+
+  <h3>预期核心结论形态</h3>
+  <p>项目最终应能给出类似以下的判断句，而非罗列图表：<strong>租金差异的主要来源是区位而非房源本身条件</strong>；<strong>在控制商圈后，电梯与装修是溢价最显著的两个属性</strong>；<strong>面积超过某一区间后单价开始显著下行，该区间即为整租的性价比高点</strong>；<strong>仅靠公开属性可解释约六到七成的租金波动，剩余部分由房龄、采光、通勤等未观测因素决定</strong>。</p>
+  <div class="note">
+    <div class="nt">填写提醒</div>
+    <p>上述结论中的具体数值需在项目实际跑完后填入，<strong>不可预先编造</strong>。作品集与面试中出现的任何百分比、R²、样本量，都应能在你的代码和报告中找到对应输出。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">05</span>项目局限性说明</h2>
+  <p>主动界定结论的适用边界，是分析可信度的一部分。以下局限需在报告与面试中同步说明，并给出对应的处理方式。</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>维度</th><th>局限</th><th>影响</th><th>应对</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>数据代表性</b></td>
+          <td>样本来自单一城市、单一或少数平台，且平台房源以中介代理为主</td>
+          <td>结论向其他城市或个人直租房源外推时失效</td>
+          <td>报告中明确标注适用范围，不外推至其他城市；对房东直租与中介代理分层讨论</td>
+        </tr>
+        <tr>
+          <td><b>价格口径</b></td>
+          <td>挂牌价不等于成交价，实际成交普遍存在议价空间</td>
+          <td>绝对租金水平可能系统性偏高，溢价幅度估计存在偏差</td>
+          <td>统一表述为"挂牌租金"；结论侧重相对比较（排序、偏离度）而非绝对水平</td>
+        </tr>
+        <tr>
+          <td><b>变量完整性</b></td>
+          <td>通勤距离、学区、房龄、采光、噪音、物业品质等关键因素未被采集</td>
+          <td>存在遗漏变量偏差，模型系数可能吸收未观测因素，影响因果解读</td>
+          <td>明确声明结论为相关关系而非因果关系；在残差分析中标注未解释部分的可能来源</td>
+        </tr>
+        <tr>
+          <td><b>数据时效</b></td>
+          <td>租房挂牌更新快、下架房源无法追踪，样本为单时点截面数据</td>
+          <td>无法分析价格调整过程与成交周期，结论具有时点性</td>
+          <td>在报告中标注采集时间窗；如条件允许，保留两期快照做简单对比</td>
+        </tr>
+        <tr>
+          <td><b>数据规模</b></td>
+          <td>数据量为单机可处理级别，不构成严格意义上的"大数据"场景</td>
+          <td>不能声称具备海量数据处理经验</td>
+          <td>如实说明量级判断依据，将分布式实现作为扩展层展示，而非包装为主链路</td>
+        </tr>
+        <tr>
+          <td><b>模型能力</b></td>
+          <td>采用基线模型，未做严格的时空交叉验证；类别特征编码较粗</td>
+          <td>模型精度有提升空间，跨时间泛化能力未经充分检验</td>
+          <td>定位为"预估基线"而非生产级模型；用误差区间代替点估计，避免过度承诺精度</td>
+        </tr>
+        <tr>
+          <td><b>合规边界</b></td>
+          <td>采集数据仅限学习研究用途</td>
+          <td>不可二次分发、不可商用</td>
+          <td>遵守平台条款与 robots 协议，作品集中仅展示聚合结果与代码方法，不公开原始明细数据</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">06</span>可直接使用的文案</h2>
+  <p>以下两版文案对应不同场景，<span class="fill">黄色标记</span>处需在项目完成后替换为真实数据，未完成前请勿填写估算值。</p>
+
+  <h3>6.1 简历项目描述（三行版）</h3>
+  <div class="copy">
+    <span class="hint">RESUME</span>
+    <b>城市租房数据集分析</b><span class="dim">　|　个人项目　|　Python · SQL · scikit-learn · Pyecharts</span><br>
+    · 独立完成 <span class="fill">N</span> 条城市租房挂牌数据的采集与清洗，制定去重、单位统一与异常值剔除规则，输出可直接建模的明细宽表与字段字典。<br>
+    · 通过分层基准与残差分析构建房源性价比指标，识别出 <span class="fill">N</span> 套同商圈显著折价房源；运用回归与树模型量化区位、面积、电梯、装修对租金的影响幅度并完成重要性排序。<br>
+    · 建立租金预估基线模型，R² 达 <span class="fill">X.XX</span>，输出误差区间与特征贡献度；结论沉淀为面向租客、房东、平台三类角色的分析报告与交互式可视化看板。
+  </div>
+
+  <h3>6.2 作品集网站项目简介</h3>
+  <div class="copy">
+    <span class="hint">PORTFOLIO</span>
+    <b>城市租房数据集分析</b><br><br>
+    <b>背景｜</b>城市租房市场信息分散、定价缺乏量化参照，租客难以判断房源价格是否合理，房东缺少挂牌定价依据。<br><br>
+    <b>做法｜</b>采集并清洗 <span class="fill">N</span> 条租房挂牌数据，按"区县—商圈—小区"三级归并区位粒度，派生租金单价、户型拆解、楼层相对位置等分析特征；以分层基准与残差法构建性价比指标，用线性回归与树模型量化各属性对租金的贡献并交叉验证重要性排序；最终以 Pyecharts 搭建包含租金分布、影响因子、性价比榜单与租金预估四个模块的可视化看板。<br><br>
+    <b>结果｜</b>识别出区位是租金差异的首要来源，控制商圈后电梯与装修为最显著溢价属性；面积与租金单价存在规模效应拐点，据此给出整租性价比最优面积区间；租金预估模型 R² 达 <span class="fill">X.XX</span>，并明确仅凭公开属性可解释约 <span class="fill">XX%</span> 的租金波动。<br><br>
+    <b>技术栈｜</b>Python（pandas / numpy / scikit-learn）、SQL（MySQL）、Pyecharts、Matplotlib<br>
+    <b>局限｜</b>样本为单城市单时点挂牌数据，不含成交价与通勤、房龄等关键变量，结论侧重相对比较而非绝对水平与外推。
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">07</span>面试追问预案</h2>
+  <p>项目写进简历后最可能被追问的方向，提前准备口径比背结论更重要。</p>
+
+  <div class="tw">
+    <table>
+      <thead><tr><th>追问</th><th>回答要点</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>你的数据量只有几万条，为什么不用 Spark / Hadoop？</b></td>
+          <td>先说量级判断：这个规模 pandas 单机处理在秒级到分钟级完成，引入分布式框架没有收益。再说能力边界：清洗逻辑已用 PySpark 实现过一版作为对照，理解了分区、宽窄依赖与 shuffle 的代价。结论是"按量级选工具"。</td>
+        </tr>
+        <tr>
+          <td><b>租金单价怎么算？为什么不直接用租金？</b></td>
+          <td>租金绝对值受面积影响，无法跨房源比较。单价（元/㎡/月）剔除了面积规模效应，才能反映区位与品质溢价。同时说明：分析大面积整租时仍需回看总价，因为租客的真实约束是月付能力。</td>
+        </tr>
+        <tr>
+          <td><b>异常值怎么处理的？会不会把真实的高价豪宅删了？</b></td>
+          <td>说明是双重校验而非单一阈值：分位数规则 + 业务常识（低价钓鱼盘、面积逻辑矛盾）。并承认边界模糊性——以商圈为单位判断而非全城，避免把核心地段豪宅误判为异常。</td>
+        </tr>
+        <tr>
+          <td><b>R² 是多少？这个数算好吗？</b></td>
+          <td>给出实测值，同时说明参照系：住房租金类截面数据 R² 在 0.6–0.75 属正常区间，因为房龄、采光、装修细节、房东心态等大量因素未进入模型。强调用 MAE 和误差区间比单看 R² 更有业务意义。</td>
+        </tr>
+        <tr>
+          <td><b>回归系数能说明因果关系吗？</b></td>
+          <td>不能。系数只反映控制其他变量后的统计关联，且存在遗漏变量（房龄、通勤、学区）。要说"带电梯的房源挂牌单价高出 X%"，而不是"装电梯会导致租金上涨 X%"。</td>
+        </tr>
+        <tr>
+          <td><b>数据是怎么来的？合规吗？</b></td>
+          <td>说明来源（公开数据集 / 遵守 robots 协议的限量采集），强调仅用于学习研究、不二次分发、作品中只公开聚合结果与代码。这是加分项——多数候选人答不上来。</td>
+        </tr>
+        <tr>
+          <td><b>这个分析最后谁在用？产生了什么价值？</b></td>
+          <td>按三类角色回答：租客用它比价与筛房，房东用它定挂牌价并预估空置风险，平台用它做房源分层与价格异常识别。避免只说"做了可视化"。</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <div class="nt">执行建议</div>
+    <p>先跑通 Q1 与 Q2（描述性 + 诊断性），这两问的结论最容易讲清楚、也最快能出图，一周内可形成可展示的初版；Q5 的建模放在最后，<strong>它是锦上添花而非必需</strong>。作品集里最重要的不是模型精度，而是你能不能把"数据说了什么、所以应该怎么做"讲完整。</p>
+  </div>
+</section>
+
+<footer>
+  城市租房数据集分析 · 项目方案<br>
+  适用于个人作品集网站与简历项目描述 · 文档版本 v1.0
+</footer>
+
+</div>
+</body>
+</html>

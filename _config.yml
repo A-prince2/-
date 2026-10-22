@@ -1,0 +1,4 @@
+theme: jekyll-theme-cayman
+title: 城市租房数据集分析
+description: 基于公开挂牌数据，量化租金影响因素、识别性价比房源、建立租金预估基线模型
+show_downloads: false

@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="820" height="420" viewBox="0 0 820 420" font-family="'Microsoft YaHei','PingFang SC',sans-serif"><rect width="820" height="420" fill="#ffffff"/>
+<text x="62" y="34" font-size="17" fill="#1f2328" text-anchor="start" font-weight="700">四城市中位租金单价</text>
+<text x="62" y="54" font-size="12" fill="#6b7280" text-anchor="start" font-weight="normal">元/㎡/月　｜　北京与广州相差 1.93 倍</text>
+<line x1="62" y1="342.0" x2="790" y2="342.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="346.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">0</text>
+<line x1="62" y1="273.0" x2="790" y2="273.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="277.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">27</text>
+<line x1="62" y1="204.0" x2="790" y2="204.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="208.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">55</text>
+<line x1="62" y1="135.0" x2="790" y2="135.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="139.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">82</text>
+<line x1="62" y1="66.0" x2="790" y2="66.0" stroke="#e5e7eb" stroke-width="1"/>
+<text x="54" y="70.0" font-size="11" fill="#6b7280" text-anchor="end" font-weight="normal">110</text>
+<rect x="124.0" y="108.1" width="58.0" height="233.9" fill="#0f766e" rx="3"/>
+<text x="153.0" y="101.1016949152542" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">92.9</text>
+<text x="153.0" y="362" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">北京</text>
+<rect x="306.0" y="118.7" width="58.0" height="223.3" fill="#0f766e" rx="3"/>
+<text x="335.0" y="111.73343605546995" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">88.6</text>
+<text x="335.0" y="362" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">深圳</text>
+<rect x="488.0" y="139.0" width="58.0" height="203.0" fill="#0f766e" rx="3"/>
+<text x="517.0" y="131.99884807748057" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">80.6</text>
+<text x="517.0" y="362" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">上海</text>
+<rect x="670.0" y="222.5" width="58.0" height="119.5" fill="#0f766e" rx="3"/>
+<text x="699.0" y="215.45875411574923" font-size="12" fill="#1f2328" text-anchor="middle" font-weight="700">47.5</text>
+<text x="699.0" y="362" font-size="12" fill="#6b7280" text-anchor="middle" font-weight="normal">广州</text>
+</svg>

@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>城市租房数据采集方案</title>
+<style>
+  :root{
+    --bg:#0f1115; --bg2:#14181f; --card:#171c24; --line:#252c37; --code:#0b0e13;
+    --tx:#e7ebf2; --tx2:#98a3b3; --tx3:#6b7686;
+    --acc:#5ee0c8; --acc-dim:#1e4d47; --warn:#e8ab5c; --warn-dim:#3d2f1c;
+    --red:#e8756b; --red-dim:#3d201d;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{-webkit-text-size-adjust:100%}
+  body{
+    background:var(--bg); color:var(--tx);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+    font-size:15px; line-height:1.85; letter-spacing:.01em;
+    padding:0 20px 100px;
+  }
+  .wrap{max-width:920px;margin:0 auto}
+  header{padding:64px 0 40px;border-bottom:1px solid var(--line);margin-bottom:8px}
+  .kicker{font-size:12px;letter-spacing:.22em;color:var(--acc);text-transform:uppercase;margin-bottom:18px}
+  h1{font-size:33px;line-height:1.3;font-weight:600;letter-spacing:-.01em}
+  .sub{color:var(--tx2);font-size:15px;margin-top:12px;max-width:680px}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:26px}
+  .tag{font-size:12px;color:var(--tx2);border:1px solid var(--line);background:var(--bg2);
+       padding:5px 12px;border-radius:100px;white-space:nowrap}
+  .tag b{color:var(--tx);font-weight:500}
+  section{padding:52px 0 8px;border-bottom:1px solid var(--line)}
+  section:last-of-type{border-bottom:none}
+  h2{font-size:13px;letter-spacing:.18em;color:var(--acc);font-weight:600;
+     text-transform:uppercase;margin-bottom:8px;display:flex;align-items:baseline;gap:12px}
+  h2 .n{font-size:11px;color:var(--tx3);letter-spacing:.1em;font-weight:400}
+  h3{font-size:19px;font-weight:600;margin:30px 0 12px;letter-spacing:-.005em}
+  h3:first-of-type{margin-top:22px}
+  h4{font-size:14px;font-weight:600;color:var(--tx);margin:0 0 6px}
+  p{color:var(--tx2);margin-bottom:14px}
+  p strong{color:var(--tx);font-weight:600}
+  ul{margin:0 0 14px 0;list-style:none}
+  li{color:var(--tx2);padding-left:18px;position:relative;margin-bottom:7px}
+  li::before{content:"";position:absolute;left:2px;top:12px;width:5px;height:1px;background:var(--acc);opacity:.7}
+  li b{color:var(--tx);font-weight:600}
+  .tw{overflow-x:auto;margin:16px 0 20px;border:1px solid var(--line);border-radius:10px}
+  table{width:100%;border-collapse:collapse;font-size:13.5px;min-width:540px}
+  th{text-align:left;padding:12px 16px;background:var(--bg2);color:var(--tx);
+     font-weight:600;font-size:12px;letter-spacing:.08em;text-transform:uppercase;
+     border-bottom:1px solid var(--line);white-space:nowrap}
+  td{padding:11px 16px;border-bottom:1px solid rgba(37,44,55,.6);color:var(--tx2);vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  td b{color:var(--tx);font-weight:600}
+  code{font-family:"SF Mono",Consolas,Monaco,monospace;font-size:12.5px;
+       background:rgba(94,224,200,.08);color:var(--acc);padding:1px 6px;border-radius:4px}
+  pre{background:var(--code);border:1px solid var(--line);border-radius:10px;
+      padding:18px 20px;overflow-x:auto;margin:14px 0 20px;
+      font-family:"SF Mono",Consolas,Monaco,monospace;font-size:13px;line-height:1.8;
+      color:#c9d2e0;white-space:pre}
+  pre .cm{color:#5e6b7d;font-style:normal}
+  pre .kw{color:#c792ea}
+  pre .st{color:#a5d6a7}
+  pre .fn{color:#82aaff}
+  pre .warn{color:var(--warn)}
+  pre b{color:var(--acc);font-weight:600}
+  .note{border:1px solid var(--warn-dim);background:rgba(232,171,92,.05);border-radius:10px;
+        padding:16px 20px;margin:16px 0 22px}
+  .note .nt{font-size:12px;letter-spacing:.12em;color:var(--warn);margin-bottom:6px;text-transform:uppercase}
+  .note p{margin:0;font-size:13.5px;color:var(--tx2);line-height:1.75}
+  .note p+p{margin-top:8px}
+  .note p strong{color:#f0d3a4}
+  .danger{border:1px solid var(--red-dim);background:rgba(232,117,107,.06);border-radius:10px;
+        padding:16px 20px;margin:16px 0 22px}
+  .danger .nt{font-size:12px;letter-spacing:.12em;color:var(--red);margin-bottom:6px;text-transform:uppercase}
+  .danger p{margin:0;font-size:13.5px;color:var(--tx2);line-height:1.75}
+  .danger p strong{color:#f2b3ad}
+  .danger p+p{margin-top:8px}
+  .grid{display:grid;gap:12px;margin:18px 0 22px}
+  .g2{grid-template-columns:repeat(2,1fr)}
+  @media(max-width:720px){.g2{grid-template-columns:1fr}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:18px 20px}
+  .card .lbl{font-size:11px;letter-spacing:.14em;color:var(--acc);text-transform:uppercase;margin-bottom:8px}
+  .card p{margin:0;font-size:13.5px;line-height:1.75}
+  .card .num{font-family:"SF Mono",Consolas,monospace;font-size:22px;color:var(--acc);
+             margin-bottom:4px;letter-spacing:-.02em}
+  footer{padding:40px 0 0;color:var(--tx3);font-size:12.5px;line-height:1.9;
+         border-top:1px solid var(--line);margin-top:40px}
+  @media(max-width:600px){
+    body{font-size:14.5px;padding:0 16px 70px}
+    h1{font-size:26px} header{padding:44px 0 32px}
+    section{padding:40px 0 6px}
+    pre{font-size:12px;padding:14px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header>
+  <div class="kicker">Data Collection Design · v1.0</div>
+  <h1>城市租房数据采集方案</h1>
+  <p class="sub">配套「城市租房数据集分析」项目的采集层设计：数据源取舍、字段口径、requests + bs4 框架思路、合规边界与 CSV 落盘。</p>
+  <div class="meta">
+    <span class="tag">技术栈 <b>requests · bs4 · csv</b></span>
+    <span class="tag">目标规模 <b>2000–5000 条</b></span>
+    <span class="tag">定位 <b>学习研究用途</b></span>
+  </div>
+</header>
+
+<section>
+  <h2><span class="n">00</span>先说结论</h2>
+  <p>我在动手前实测了目标站点的 robots 协议，结果直接决定了方案结构，必须先讲清楚：</p>
+
+  <div class="danger">
+    <div class="nt">实测结果</div>
+    <p><strong>lianjia.com/robots.txt 的结尾是 <code>User-agent: *</code> + <code>Disallow : /*</code></strong>——对所有未单独列出的爬虫（也就是你自己写的脚本）<strong>禁止抓取全站</strong>。</p>
+    <p>而贝壳、安居客、58 同城等平台在用户协议中普遍禁止未经许可的自动化采集，并配合验证码与风控。这类站点<strong>不是</strong>"能爬但慢一点"的问题，而是从协议层面就不允许。</p>
+  </div>
+
+  <p>所以本方案走<b>双轨制</b>，两条线的目的不同：</p>
+  <div class="grid g2">
+    <div class="card">
+      <div class="lbl">主线 · 用于分析</div>
+      <h4>公开数据集导入</h4>
+      <p>直接使用许可清晰的现成数据集（CC0 / 平台公开），零合规风险、可复现、评审能直接跑通。分析项目真正的主体数据走这条线。</p>
+    </div>
+    <div class="card">
+      <div class="lbl">辅线 · 用于展示能力</div>
+      <h4>离线页面解析练习</h4>
+      <p>把页面另存为本地 HTML，用 bs4 做解析与字段抽取练习，全程零网络请求。既练了技术，又不触碰任何协议红线。</p>
+    </div>
+  </div>
+
+  <p><strong>为什么这么设计：</strong>面试官问"数据怎么来的"，答"用了和鲸 CC0 数据集，并设计了可复用的解析框架"是站得住的；答"我爬了链家"则要面对"你看过它的 robots 吗"这一问。前者是加分，后者是风险敞口。技术上你学到的东西完全一样——requests 与 bs4 的核心能力都在解析层，不在"能不能拿到页面"。</p>
+</section>
+
+<section>
+  <h2><span class="n">01</span>推荐数据源</h2>
+
+  <h3>1.1 首选：现成公开数据集</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>数据集</th><th>规模与字段</th><th>许可</th><th>适用判断</th></tr></thead>
+      <tbody>
+        <tr>
+          <td><b>和鲸社区 · 北上广深链家租房数据</b><br><span style="color:#6b7686;font-size:12px">heywhale.com/mw/dataset/5f437093ad27ec002de0dbe2</span></td>
+          <td>四城市各 3000 条，含区域、小区、户型、面积、朝向、楼层、装修、租金</td>
+          <td><b>CC0 公共领域</b></td>
+          <td><b>最推荐。</b>CC0 意味着可自由使用与展示，字段与你的分析问题高度匹配，规模适中无需清洗过度</td>
+        </tr>
+        <tr>
+          <td><b>数据集市 · 2019 未来杯房产租金预测</b><br><span style="color:#6b7686;font-size:12px">shujujishi.com/dataset/house-rent-prediction-dataset</span></td>
+          <td>北上广深共 105258 条租赁记录</td>
+          <td>公开免费</td>
+          <td>样本量大，适合做统计稳健性检验；但年份较旧，且需核实字段完整度</td>
+        </tr>
+        <tr>
+          <td><b>GitHub 开源数据仓库</b><br><span style="color:#6b7686;font-size:12px">Alfred1984/interesting-python（BSGS_Rent 目录）</span></td>
+          <td>上述和鲸数据的原始出处，CSV 直出</td>
+          <td>仓库 LICENSE 需自行确认</td>
+          <td>下载最方便，适合快速起步；引用时注明原始仓库</td>
+        </tr>
+        <tr>
+          <td><b>Kaggle · House Rent Prediction Dataset</b></td>
+          <td>约 4700 条，字段规范（BHK、面积、楼层、家具、租客偏好）</td>
+          <td>Kaggle 平台条款</td>
+          <td>字段设计干净，适合练手与对照；但为印度城市数据，<b>不能用于"中国城市租金"主题</b></td>
+        </tr>
+        <tr>
+          <td><b>各地公共数据开放平台</b><br><span style="color:#6b7686;font-size:12px">如成都市公共数据开放平台</span></td>
+          <td>多为租赁备案统计、租金指导价等宏观汇总数据</td>
+          <td>政府开放许可</td>
+          <td>无房源明细，但可作为<b>外部校验口径</b>，对比你的样本是否偏离官方统计</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="note">
+    <div class="nt">数据时效问题（务必处理）</div>
+    <p>和鲸与未来杯的数据均为 <strong>2019–2020 年</strong>，距今已有数年。直接拿来做"当前租金市场分析"会被追问"数据过时"。</p>
+    <p><strong>两个处理办法：</strong>一是把项目明确定位为<strong>"历史快照分析"</strong>，标题与结论都不写"当前"；二是若能找到两期数据，改做<strong>跨期对比</strong>（如 2020 vs 2024 租金结构变化），时效劣势反而变成分析亮点。后者更适合写进简历。</p>
+  </div>
+
+  <h3>1.2 备选：自主采集（仅限 robots 允许的站点）</h3>
+  <p>如果你确实需要新鲜数据来体现采集能力，按以下顺序筛选目标，<b>不要跳过第 0 步</b>：</p>
+  <ul>
+    <li><b>第 0 步 · 查协议：</b>浏览器打开 <code>目标站域名/robots.txt</code>，找到 <code>User-agent: *</code> 段落。若存在 <code>Disallow: /</code> 或你要抓的路径被禁，<b>放弃该站点</b>，不要用改 UA 的方式绕。</li>
+    <li><b>第 1 步 · 查条款：</b>翻一遍用户协议中"禁止自动化访问 / 数据抓取"的条款。有明确禁止即视为不授权。</li>
+    <li><b>第 2 步 · 选替代来源：</b>优先找个人房东信息平台、地方性分类信息站、高校周边租房公告栏类站点——反爬弱、robots 宽松的概率更高。</li>
+    <li><b>第 3 步 · 控规模：</b>控制在 2000–5000 条。这个量级做分析完全够用，而请求量越小，对目标站的压力与自身风险都越低。</li>
+  </ul>
+  <p>找不到合规目标也不必勉强。作品集评审看的是<b>分析的完整度</b>，不是"有没有写爬虫"。</p>
+</section>
+
+<section>
+  <h2><span class="n">02</span>字段清单</h2>
+  <p>字段分三层设计：核心层是分析必需，增强层服务于具体业务问题，元数据层用于追溯与调试。即使走公开数据集，也建议按此清单做一次字段映射——你的分析代码就不必和数据源格式绑死。</p>
+
+  <h3>2.1 核心字段（分析必需，缺一不可）</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>字段</th><th>类型</th><th>示例</th><th>说明与解析要点</th></tr></thead>
+      <tbody>
+        <tr><td><code>house_id</code></td><td>str</td><td>108400001234</td><td>去重主键。若源站无此字段，用 <code>小区+面积+户型+租金</code> 生成哈希替代</td></tr>
+        <tr><td><code>city</code></td><td>str</td><td>成都</td><td>多城市数据必采，用于分层聚合</td></tr>
+        <tr><td><code>district</code></td><td>str</td><td>高新区</td><td>区县，第一级区位粒度</td></tr>
+        <tr><td><code>business_area</code></td><td>str</td><td>天府长城</td><td>商圈，<b>Q3 性价比分析的分层基准单位</b>，最重要</td></tr>
+        <tr><td><code>rent</code></td><td>float</td><td>3200</td><td>月租金（元）。注意是否含"元/天"，需统一换算</td></tr>
+        <tr><td><code>area</code></td><td>float</td><td>89.5</td><td>面积（㎡）。需剥离单位字符串，警惕"89㎡""89平"混写</td></tr>
+        <tr><td><code>layout_raw</code></td><td>str</td><td>2室1厅1卫</td><td>户型原始串，清洗阶段再拆解</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>2.2 派生字段（不采集，清洗阶段生成）</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>字段</th><th>生成规则</th><th>用途</th></tr></thead>
+      <tbody>
+        <tr><td><code>unit_price</code></td><td><code>rent / area</code></td><td>租金单价，全部横向比较的核心指标</td></tr>
+        <tr><td><code>room</code> / <code>hall</code> / <code>bath</code></td><td>正则拆解 <code>layout_raw</code></td><td>户型特征，进入建模</td></tr>
+        <tr><td><code>area_bin</code></td><td>面积分箱（如 30 以下 / 30-60 / 60-90 / 90+）</td><td>Q4 拐点分析</td></tr>
+        <tr><td><code>floor_ratio</code></td><td><code>floor / total_floor</code></td><td>楼层相对位置，比绝对楼层更有解释力</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>2.3 增强字段（按需采集）</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>字段</th><th>类型</th><th>价值</th><th>解析难度</th></tr></thead>
+      <tbody>
+        <tr><td><code>community</code></td><td>str</td><td>小区名，可做更细粒度聚合</td><td>低（但同名简称多，需归并）</td></tr>
+        <tr><td><code>orientation</code></td><td>str</td><td>朝向，影响采光溢价</td><td>低（存在"南北"组合值）</td></tr>
+        <tr><td><code>floor_raw</code></td><td>str</td><td>"中楼层/共18层"，需拆两段</td><td><b>中</b>（文本混数字）</td></tr>
+        <tr><td><code>decoration</code></td><td>str</td><td>装修等级，Q2 重要的溢价因子</td><td>低（等级需映射为序数）</td></tr>
+        <tr><td><code>elevator</code></td><td>bool</td><td>电梯，预期显著影响租金</td><td><b>中</b>（常缺失，需按总楼层推断）</td></tr>
+        <tr><td><code>list_date</code></td><td>date</td><td>挂牌日期，可算挂牌时长</td><td>高（常为相对时间"3天前"，需换算）</td></tr>
+        <tr><td><code>tags</code></td><td>str</td><td>标签（近地铁/随时看房），可做衍生特征</td><td>中（多值需拼接）</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>2.4 元数据字段（必须采集）</h3>
+  <ul>
+    <li><code>collect_date</code> — 采集日期。没有这个字段，报告就无法声明数据时效，是硬性要求。</li>
+    <li><code>source_url</code> — 房源详情页地址。用于追溯与人工校验样本，也是评审验证真实性的依据。</li>
+    <li><code>source_platform</code> — 数据来源标识。多来源合并时必需。</li>
+    <li><code>page_no</code> — 采集页码。调试阶段用来定位"哪一页开始出现脏数据"。</li>
+  </ul>
+
+  <div class="note">
+    <div class="nt">不要采集的字段</div>
+    <p><strong>房东 / 中介的姓名、手机号、微信号、身份证号、照片</strong>——这些属于个人信息，受《个人信息保护法》约束，采集需取得单独同意。你的分析用不到它们，采了纯属给自己增加风险。分析只需要房源属性，不需要人的信息。</p>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">03</span>requests + bs4 框架思路</h2>
+  <p>核心原则：<b>把"拿数据"和"解析数据"彻底分开</b>。请求层只管拿到 HTML，解析层只管从 HTML 里抽字段，存储层只管落盘。三者解耦后，你可以用本地 HTML 文件喂给解析层反复调试，完全不必反复请求服务器——这既是效率问题，也是礼貌问题。</p>
+
+  <p>完整骨架见配套文件 <code>collector_skeleton.py</code>，下面只讲结构与关键决策。</p>
+
+  <h3>3.1 分层结构</h3>
+  <pre><span class="cm">collector/
+├── config.py        # 常量集中管理：目标 URL、请求头、间隔、路径、字段顺序
+├── fetch.py         # 请求层：会话、超时、重试、限速、状态码判断
+├── parse.py         # 解析层：HTML → dict，纯函数，可离线测试
+├── storage.py       # 存储层：追加写 CSV + raw 备份
+└── main.py          # 编排：翻页循环 + 进度打印 + 异常中断保护</span></pre>
+  <p>学生项目最容易犯的错是把这些全塞进一个 <code>for</code> 循环里。等到解析出错，你分不清是网络问题、页面结构变了、还是字段抽取写错了。<b>分层是为了让错误有位置。</b></p>
+
+  <h3>3.2 请求层：三个必须做的保护</h3>
+  <pre><span class="kw">import</span> random, time, requests
+
+<span class="kw">def</span> <span class="fn">fetch</span>(session, url, retry=3):
+    <span class="cm"># 1) 每一次请求都要有超时。没有 timeout 的请求可能永久挂住，</span>
+    <span class="cm">#    调试时会误以为是程序卡死，实际是在等一个永远不来的响应。</span>
+    <span class="kw">for</span> attempt <span class="kw">in</span> range(retry):
+        <span class="kw">try</span>:
+            resp = session.get(url, timeout=(5, 15))
+            <span class="cm"># 2) 状态码必须显式判断，不要假设 200。</span>
+            <span class="cm">#    403/429 是明确的"请你停下"信号 —— 遇到就停止，</span>
+            <span class="cm">#    不要换 UA、换代理重试，那性质就从"抓取"变成"绕过风控"了。</span>
+            <span class="kw">if</span> resp.status_code == 200:
+                <span class="kw">return</span> resp
+            <span class="kw">if</span> resp.status_code <span class="kw">in</span> (403, 429):
+                <span class="warn">print</span>(<span class="st">"被限流或拒绝，停止采集"</span>); <span class="kw">return</span> <span class="kw">None</span>
+        <span class="kw">except</span> requests.RequestException <span class="kw">as</span> e:
+            <span class="warn">print</span>(f<span class="st">"第 {attempt+1} 次失败: {e}"</span>)
+            time.sleep(2 ** attempt)   <span class="cm"># 3) 退避重试，间隔递增</span>
+    <span class="kw">return</span> <span class="kw">None</span>
+</pre>
+
+  <p><b>间隔控制放在翻页循环里，不要放在函数内部</b>——让它显式可见，将来调参时你能一眼看到自己在请求多少次：</p>
+  <pre>time.sleep(random.uniform(2, 5))   <span class="cm"># 随机间隔，避免固定节奏</span></pre>
+
+  <h3>3.3 解析层：先离线，再联网</h3>
+  <p>这一步是新手最容易卡住的地方，给一条能少走很多弯路的路径：</p>
+  <ul>
+    <li><b>① 抓一次，存快照。</b>成功请求一页后立刻 <code>resp.text</code> 写入 <code>debug/page_001.html</code>，编码用 <code>resp.encoding = resp.apparent_encoding</code> 兜底。</li>
+    <li><b>② 用浏览器打开快照。</b>在快照文件上按 F12 检查元素，而不是在真实网站上——真实页面可能被 JS 改写，快照才是你要解析的那份。</li>
+    <li><b>③ 判断是否为动态渲染。</b>若快照里搜不到房源价格，说明数据是 JS 异步加载的，bs4 拿不到，此时应<b>换目标站点</b>而非硬啃（绕过渲染属于增加侵入性，不建议在学习项目中做）。</li>
+    <li><b>④ 定列表容器，再遍历子项。</b>结构永远是"找到一个装列表的父元素 → 循环子元素 → 每个子元素里抽字段"，不要写一长串精确到层级的选择器，页面一改就全废。</li>
+    <li><b>⑤ 每个字段独立 try。</b>单字段抽取失败返回 <code>None</code>，不要让整条记录崩掉，也不要让异常冒到外层终止翻页。</li>
+  </ul>
+  <pre><span class="kw">def</span> <span class="fn">parse_page</span>(html, page_no):
+    soup = BeautifulSoup(html, <span class="st">"html.parser"</span>)
+    container = soup.select_one(<span class="st">"&lt;列表父元素的 CSS 选择器&gt;"</span>)   <span class="cm"># TODO: 从快照里自己找</span>
+    <span class="kw">if not</span> container: <span class="kw">return</span> []
+
+    rows = []
+    <span class="kw">for</span> item <span class="kw">in</span> container.select(<span class="st">"&lt;单个房源的 CSS 选择器&gt;"</span>):
+        row = {<span class="st">"page_no"</span>: page_no}
+        <span class="cm"># 关键：每个字段单独 try，缺失就置 None，绝不让一条脏记录中断整页</span>
+        <span class="kw">for</span> field, selector <span class="kw">in</span> FIELD_SELECTORS.items():
+            <span class="kw">try</span>:
+                node = item.select_one(selector)
+                row[field] = node.get_text(strip=True) <span class="kw">if</span> node <span class="kw">else</span> <span class="kw">None</span>
+            <span class="kw">except</span> Exception:
+                row[field] = <span class="kw">None</span>
+        rows.append(row)
+    <span class="kw">return</span> rows</pre>
+  <p>注意 <code>FIELD_SELECTORS</code> 用<b>字典配置</b>而不是硬编码二十行 <code>try</code>。页面改版时你只改配置，不改逻辑。</p>
+
+  <h3>3.4 数值字段的提取</h3>
+  <p>列表页的文字几乎都带单位，统一用正则抽数字，再在清洗阶段换算：</p>
+  <pre><span class="kw">import</span> re
+
+<span class="kw">def</span> <span class="fn">to_number</span>(text):
+    <span class="cm"># "3200元/月" -> 3200.0 ; "89.5㎡" -> 89.5 ; "--" -> None</span>
+    <span class="kw">if not</span> text: <span class="kw">return</span> <span class="kw">None</span>
+    m = re.search(<span class="st">r"\d+(?:\.\d+)?"</span>, text.replace(<span class="st">","</span>, <span class="st">""</span>))
+    <span class="kw">return</span> float(m.group()) <span class="kw">if</span> m <span class="kw">else</span> <span class="kw">None</span></pre>
+
+  <h3>3.5 调试节奏建议</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>阶段</th><th>做什么</th><th>通过标准</th></tr></thead>
+      <tbody>
+        <tr><td><b>1 打通</b></td><td>只请求第 1 页，print 状态码与响应长度，存 HTML 快照</td><td>能拿到完整 HTML，编码正常无乱码</td></tr>
+        <tr><td><b>2 单字段</b></td><td>在快照上只抽 <code>rent</code> 一个字段，print 前 3 条</td><td>3 条租金与实际页面一致</td></tr>
+        <tr><td><b>3 全字段</b></td><td>补齐字段字典，抽 1 页，存 CSV 用 Excel 打开看</td><td>字段对齐、无错列、空值位置合理</td></tr>
+        <tr><td><b>4 翻页</b></td><td>加翻页循环与间隔，跑到第 3 页就停</td><td>页数递增正确，无重复数据</td></tr>
+        <tr><td><b>5 全量</b></td><td>放开页数上限，控制总量 2000–5000 条</td><td>断点续跑可用，中断后能接着采</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p><b>不要跳过第 2 步。</b>直接写完整脚本再跑，出错时你面对的是二十个字段同时为空，逐个排查比一开始就单字段验证慢得多。</p>
+</section>
+
+<section>
+  <h2><span class="n">04</span>采集规范与风险边界</h2>
+
+  <h3>4.1 robots 协议：程序化检查，不靠猜</h3>
+  <p>robots 不是法律，但它是网站明示的授权范围，在司法实践中被作为判断"是否未经授权访问"的重要事实依据。用标准库三行代码就能查，没理由跳过：</p>
+  <pre><span class="kw">from</span> urllib.robotparser <span class="kw">import</span> RobotFileParser
+<span class="kw">from</span> urllib.parse <span class="kw">import</span> urlparse
+
+<span class="kw">def</span> <span class="fn">allowed</span>(url, ua=<span class="st">"StudentResearchBot"</span>):
+    p = urlparse(url); rp = RobotFileParser()
+    rp.set_url(f<span class="st">"{p.scheme}://{p.netloc}/robots.txt"</span>)
+    rp.read()
+    <span class="kw">return</span> rp.can_fetch(ua, url)   <span class="cm"># False 就别采了</span></pre>
+  <p>注意 UA 要<b>如实填写</b>。用浏览器 UA 伪装成普通用户去抓，等于隐去真实身份，这是"绕过访问控制"的典型特征，风险远大于直接标明来意。</p>
+
+  <h3>4.2 频率与规模</h3>
+  <div class="grid g2">
+    <div class="card">
+      <div class="lbl">请求间隔</div>
+      <div class="num">2–5 s</div>
+      <p>随机取值，避免固定节奏。这个间隔对一个学生项目完全够用，一天采千条也就一小时。</p>
+    </div>
+    <div class="card">
+      <div class="lbl">总量上限</div>
+      <div class="num">2000–5000</div>
+      <p>做分析足够。规模越小，对目标站影响越小，自身风险敞口也越小。</p>
+    </div>
+    <div class="card">
+      <div class="lbl">单次时长</div>
+      <div class="num">≤ 60 min</div>
+      <p>单次运行不超过一小时，跑完即停，不要挂后台持续采。</p>
+    </div>
+    <div class="card">
+      <div class="lbl">并发</div>
+      <div class="num">1</div>
+      <p>串行执行。多线程并发会成倍放大服务器压力，学习项目没有任何理由这样做。</p>
+    </div>
+  </div>
+
+  <h3>4.3 五条红线</h3>
+  <div class="danger">
+    <div class="nt">不要做的事</div>
+    <p><strong>① 绕过技术措施。</strong>破解加密参数、逆向签名算法、伪造 Cookie 或 Token、用代理池轮换 IP 规避封禁——这些行为直接对应"突破技术保护措施"，性质与普通抓取完全不同。</p>
+    <p><strong>② 采集个人信息。</strong>房东姓名、手机号、微信号、身份证、照片属于《个人信息保护法》规制的个人信息，未经同意采集并存储即构成风险。你的分析用不到，别采。</p>
+    <p><strong>③ 高频或并发压站。</strong>可能影响服务正常运行，涉及《反不正当竞争法》相关条款，也可能触及《刑法》第二百八十五条的边界。</p>
+    <p><strong>④ 数据商用或二次分发。</strong>学习研究用途与商业使用是两回事。原始明细不上传公开仓库，作品集只放聚合结果与代码方法。</p>
+    <p><strong>⑤ 无视拒绝信号。</strong>收到 403/429 或验证码页面时立即停止。继续尝试就是明确的"未经授权"证据。</p>
+  </div>
+
+  <h3>4.4 写进作品集的合规表述</h3>
+  <p>合规不是负担，<b>主动声明反而是加分项</b>——绝大多数候选人根本想不到这一点。建议在项目 README 里写一段：</p>
+  <pre><span class="cm">数据说明</span>
+本分析使用和鲸社区公开数据集（CC0 许可），采集日期为 20XX-XX-XX。
+数据仅用于学习研究与作品展示，不用于商业用途，不对外分发原始明细。
+项目未采集任何个人身份信息，仅涉及房源属性字段。
+如涉及自主采集，均事先核实目标站点 robots 协议与用户条款，串行请求、间隔 2–5 秒，遵守 403/429 停止信号。</pre>
+</section>
+
+<section>
+  <h2><span class="n">05</span>CSV 存储方案</h2>
+
+  <h3>5.1 四个关键参数（不设会踩坑）</h3>
+  <div class="tw">
+    <table>
+      <thead><tr><th>参数</th><th>取值</th><th>不这么写会怎样</th></tr></thead>
+      <tbody>
+        <tr><td><code>encoding</code></td><td><b>utf-8-sig</b></td><td>用 UTF-8 存，Excel 打开中文全是乱码，评审第一眼就减分</td></tr>
+        <tr><td><code>newline</code></td><td><b>""</b></td><td>Windows 下每行之间多出空行，数据行数翻倍</td></tr>
+        <tr><td><code>mode</code></td><td><b>"a"</b> 追加</td><td>用 "w" 会覆盖，程序中断后前面采的全没了</td></tr>
+        <tr><td><code>fieldnames</code></td><td>固定常量列表</td><td>不同记录字段顺序不一致，列会错位</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <pre><span class="kw">import</span> csv, os, json
+
+FIELDS = [<span class="st">"house_id"</span>, <span class="st">"city"</span>, <span class="st">"district"</span>, <span class="st">"business_area"</span>,
+          <span class="st">"community"</span>, <span class="st">"rent"</span>, <span class="st">"area"</span>, <span class="st">"layout_raw"</span>,
+          <span class="st">"orientation"</span>, <span class="st">"floor_raw"</span>, <span class="st">"decoration"</span>, <span class="st">"elevator"</span>,
+          <span class="st">"collect_date"</span>, <span class="st">"source_url"</span>, <span class="st">"page_no"</span>]
+
+<span class="kw">def</span> <span class="fn">save_rows</span>(rows, path=<span class="st">"data/rent_raw.csv"</span>):
+    os.makedirs(os.path.dirname(path), exist_ok=<span class="kw">True</span>)
+    new_file = <span class="kw">not</span> os.path.exists(path)
+    <span class="cm"># utf-8-sig：带 BOM，Excel 直接双击打开中文不乱码</span>
+    <span class="cm"># newline=""：不加这个，Windows 下每条记录之间会多一个空行</span>
+    <span class="kw">with</span> open(path, <span class="st">"a"</span>, newline=<span class="st">""</span>, encoding=<span class="st">"utf-8-sig"</span>) <span class="kw">as</span> f:
+        w = csv.DictWriter(f, fieldnames=FIELDS, extrasaction=<span class="st">"ignore"</span>)
+        <span class="kw">if</span> new_file:
+            w.writeheader()          <span class="cm"># 只在首次写表头</span>
+        <span class="kw">for</span> r <span class="kw">in</span> rows:
+            w.writerow({k: r.get(k) <span class="kw">for</span> k <span class="kw">in</span> FIELDS})</pre>
+
+  <p><code>extrasaction="ignore"</code> 这个参数值得留意：解析层多抽了一个字段时，写盘不会报错崩掉。调试阶段字段常变，别让它成为中断原因。</p>
+
+  <h3>5.2 双份落盘：CSV + raw 备份</h3>
+  <p>建议每次都额外存一份原始 HTML 或原始记录 JSON，理由很实在：<b>解析逻辑写错时，你不需要重新请求服务器</b>，直接用备份重跑解析即可。这既是效率，也是对目标站的基本礼貌。</p>
+  <pre><span class="kw">def</span> <span class="fn">save_raw_snapshot</span>(html, page_no, dir_=<span class="st">"debug"</span>):
+    os.makedirs(dir_, exist_ok=<span class="kw">True</span>)
+    <span class="kw">with</span> open(f<span class="st">"{dir_}/page_{page_no:03d}.html"</span>, <span class="st">"w"</span>, encoding=<span class="st">"utf-8"</span>) <span class="kw">as</span> f:
+        f.write(html)</pre>
+
+  <h3>5.3 断点续采</h3>
+  <p>爬虫跑到一半被打断是常态（网络断、电脑休眠、被封）。最简单的续采方案不需要数据库，记一个进度文件即可：</p>
+  <pre><span class="kw">def</span> <span class="fn">load_progress</span>():          <span class="cm"># 返回上次完成的页码，没有则从 1 开始</span>
+    <span class="kw">try</span>:
+        <span class="kw">with</span> open(<span class="st">"data/progress.json"</span>, encoding=<span class="st">"utf-8"</span>) <span class="kw">as</span> f:
+            <span class="kw">return</span> json.load(f).get(<span class="st">"last_page"</span>, 0)
+    <span class="kw">except</span> FileNotFoundError:
+        <span class="kw">return</span> 0</pre>
+  <p>每页写完就更新这个文件。<b>顺序很重要：先落 CSV，再更新进度</b>——反过来的话，中途崩溃会丢掉那一页。</p>
+
+  <h3>5.4 目录组织</h3>
+  <pre><span class="cm">project/
+├── data/
+│   ├── rent_raw.csv        # 原始采集结果，不手改
+│   ├── rent_clean.csv      # 清洗后，供分析使用
+│   └── progress.json       # 断点进度
+├── debug/                  # HTML 快照，调试用，最后可不提交
+├── collector/              # 采集代码
+└── README.md               # 数据来源、许可、采集日期、字段说明</span></pre>
+  <p><b>原始层不手改</b>是一条数据工程纪律：任何清洗都必须由代码从 raw 重新生成 clean，否则过程不可复现，评审时也无法验证你的清洗逻辑。</p>
+</section>
+
+<footer>
+  城市租房数据采集方案 · 配套「城市租房数据集分析」项目<br>
+  本文档用于学习研究场景 · 采集前请自行核实目标站点 robots 协议与用户条款 · v1.0
+</footer>
+
+</div>
+</body>
+</html>
